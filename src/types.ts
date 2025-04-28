@@ -12,3 +12,9 @@ export type DurationType = {
 
 // LogType for handling log type selection (meeting or task)
 export type LogType = 'meeting' | 'task';
+
+// EntryType for handling entries
+export type EntryType = {
+  entry: string;
+  date: string;
+};
