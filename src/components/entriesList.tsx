@@ -1,0 +1,9 @@
+export const EntriesList = ({ entries }: { entries: string[] }) => {
+  return (
+    <ul className='entries-list'>
+      {entries.map((entry, index) => (
+        <li key={index}>{entry}</li>
+      ))}
+    </ul>
+  );
+};

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import Select from 'react-select';
-import CreatableSelect from 'react-select/creatable';
+import { Header } from './components/header';
+import { LogTypeSelector } from './components/logTypeSelector';
+import { MeetingForm } from './components/meetingForm';
+import { TaskForm } from './components/taskForm';
+import { DurationSelector } from './ui/durationSelector';
+import { EntriesList } from './components/entriesList';
+import { StartNewDayButton } from './components/startNewDayButton';
 import { setTheme, loadTheme } from './utils/theme';
 import './App.css';
-const durationOptions = Array.from({ length: 32 }, (_, i) => ({
-  value: (i + 1) * 15,
-  label: `${(i + 1) * 15} min`,
-}));
 
 type OptionType = { label: string; value: string };
 
@@ -27,7 +28,7 @@ const App = () => {
     label: string;
   } | null>(null);
   const [entries, setEntries] = useState<string[]>([]);
-  const [theme, setThemeState] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
     loadTheme();
@@ -103,86 +104,35 @@ const App = () => {
 
   return (
     <div className='container'>
-      <div className='header'>
-        <h2>Work Logger</h2>
-        <button onClick={toggleTheme} className='theme-toggle'>
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
-      </div>
-
-      <select
-        value={logType}
-        onChange={(e) => setLogType(e.target.value as 'meeting' | 'task')}
-        className='select-type'
-      >
-        <option value='meeting'>Meeting</option>
-        <option value='task'>Task</option>
-      </select>
-
+      <Header theme={theme} toggleTheme={toggleTheme} />
+      <LogTypeSelector logType={logType} setLogType={setLogType} />
       {logType === 'meeting' && (
-        <>
-          <CreatableSelect
-            placeholder='Select or type meeting name'
-            value={selectedMeeting}
-            onChange={(e) => setSelectedMeeting(e)}
-            onCreateOption={(inputValue) =>
-              setSelectedMeeting({ label: inputValue, value: inputValue })
-            }
-            options={meetings}
-            isClearable
-            isSearchable
-          />
-          <CreatableSelect
-            placeholder='Select or type project name'
-            value={selectedProject}
-            onChange={(e) => setSelectedProject(e)}
-            onCreateOption={(inputValue) =>
-              setSelectedProject({ label: inputValue, value: inputValue })
-            }
-            options={projects}
-            isClearable
-            isSearchable
-          />
-        </>
-      )}
-
-      {logType === 'task' && (
-        <CreatableSelect
-          placeholder='Select or type task name'
-          value={selectedTask}
-          onChange={(e) => setSelectedTask(e)}
-          onCreateOption={(inputValue) =>
-            setSelectedTask({ label: inputValue, value: inputValue })
-          }
-          options={tasks}
-          isClearable
-          isSearchable
+        <MeetingForm
+          meetings={meetings}
+          selectedMeeting={selectedMeeting}
+          setSelectedMeeting={setSelectedMeeting}
+          projects={projects}
+          selectedProject={selectedProject}
+          setSelectedProject={setSelectedProject}
         />
       )}
-
-      <Select
-        placeholder='Select duration'
-        value={selectedDuration}
-        onChange={(e) => setSelectedDuration(e)}
-        options={durationOptions}
+      {logType === 'task' && (
+        <TaskForm
+          tasks={tasks}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+        />
+      )}
+      <DurationSelector
+        selectedDuration={selectedDuration}
+        setSelectedDuration={setSelectedDuration}
       />
-
       <button onClick={handleAddEntry} className='add-entry'>
         ➕ Add Entry
       </button>
-
       <h3>Today's Log</h3>
-
-      <button onClick={startNewDay} className='start-new-day'>
-        🌅 Start New Day
-      </button>
-
-      <ul className='entries-list'>
-        {entries.map((entry, index) => (
-          <li key={index}>{entry}</li>
-        ))}
-      </ul>
-
+      <StartNewDayButton startNewDay={startNewDay} />
+      <EntriesList entries={entries} />
       <button onClick={copyEntries} className='copy-all'>
         📋 Copy All
       </button>
