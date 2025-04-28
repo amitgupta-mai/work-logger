@@ -1,24 +1,37 @@
+import { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 
 export const TaskForm = ({
-  tasks,
-  selectedTask,
-  setSelectedTask,
+  selectedProject,
+  setSelectedProject,
 }: {
-  tasks: OptionType[];
-  selectedTask: OptionType | null;
-  setSelectedTask: (task: OptionType | null) => void;
+  selectedProject: OptionType | null;
+  setSelectedProject: (project: OptionType | null) => void;
 }) => {
+  const [projects, setProjects] = useState<OptionType[]>([]);
+
+  useEffect(() => {
+    chrome.storage.local.get(['projects'], (result) => {
+      if (result.projects) {
+        setProjects(result.projects);
+      }
+    });
+  }, [setSelectedProject]);
+
+  const handleCreateProject = (inputValue: string) => {
+    const newProject = { label: inputValue, value: inputValue };
+    setSelectedProject(newProject);
+    chrome.storage.local.set({ projects: [...projects, newProject] });
+  };
+
   return (
     <CreatableSelect
-      placeholder='Select or type task name'
-      value={selectedTask}
-      onChange={(e) => setSelectedTask(e)}
-      onCreateOption={(inputValue) =>
-        setSelectedTask({ label: inputValue, value: inputValue })
-      }
-      options={tasks}
+      placeholder='Select or type project name'
+      value={selectedProject}
+      onChange={(e) => setSelectedProject(e)}
+      onCreateOption={handleCreateProject}
+      options={projects}
       isClearable
       isSearchable
     />

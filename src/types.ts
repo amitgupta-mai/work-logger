@@ -15,6 +15,7 @@ export type LogType = 'meeting' | 'task';
 
 // EntryType for handling entries
 export type EntryType = {
+  id: string;
   entry: string;
   date: string;
 };
