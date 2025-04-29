@@ -10,6 +10,10 @@ import { EntryType, OptionType } from './types';
 import './App.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const App = () => {
   const [logType, setLogType] = useState<'meeting' | 'task'>('meeting');
@@ -30,9 +34,7 @@ const App = () => {
     loadTheme();
     chrome.storage.local.get(['allEntries'], (result) => {
       const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
-      console.log({ today });
       const _todayEntries = result.allEntries?.[today] || [];
-      console.log({ _todayEntries });
       setTodayEntries(_todayEntries);
     });
   }, [selectedDate]);
@@ -97,6 +99,38 @@ const App = () => {
     return !selectedProject || !selectedDuration;
   }, [logType, selectedPerson, selectedProject, selectedDuration]);
 
+  const handleDeleteEntry = (entryId: string) => {
+    confirmAlert({
+      title: 'Confirm to delete',
+      message: 'Are you sure you want to delete this entry?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {
+            setTodayEntries(
+              todayEntries.filter((entry) => entry.id !== entryId)
+            );
+            chrome.storage.local.get(['allEntries'], (result) => {
+              const allEntries = result.allEntries || {};
+              const today = (selectedDate ?? new Date())
+                .toISOString()
+                .split('T')[0];
+              allEntries[today] = allEntries[today].filter(
+                (entry: EntryType) => entry.id !== entryId
+              );
+              chrome.storage.local.set({ allEntries });
+            });
+            toast.success('Entry deleted successfully!');
+          },
+        },
+        {
+          label: 'No',
+          onClick: () => {},
+        },
+      ],
+    });
+  };
+
   return (
     <div className='container' style={{ position: 'relative' }}>
       <Header theme={theme} toggleTheme={toggleTheme} />
@@ -133,8 +167,14 @@ const App = () => {
           onChange={(date) => setSelectedDate(date)}
           dateFormat='dd/MM/yyyy'
         />
+        {todayEntries.length > 0 && (
+          <EntriesList
+            entries={todayEntries}
+            handleDeleteEntry={handleDeleteEntry}
+            selectedDate={selectedDate ?? new Date()}
+          />
+        )}
       </div>
-      <EntriesList entries={todayEntries.map((e) => e.entry)} />
       <button onClick={copyEntries} className='copy-all'>
         📋 Copy All
       </button>
