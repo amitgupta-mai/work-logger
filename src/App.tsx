@@ -8,6 +8,8 @@ import { EntriesList } from './components/entriesList';
 import { setTheme, loadTheme } from './utils/theme';
 import { EntryType, OptionType } from './types';
 import './App.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const App = () => {
   const [logType, setLogType] = useState<'meeting' | 'task'>('meeting');
@@ -22,19 +24,18 @@ const App = () => {
   const [theme, setThemeState] = useState<'light' | 'dark'>('dark');
   const [todayEntries, setTodayEntries] = useState<EntryType[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<OptionType | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
   useEffect(() => {
     loadTheme();
     chrome.storage.local.get(['allEntries'], (result) => {
-      const today = new Date().toISOString().split('T')[0];
-      const _todayEntries = result.allEntries?.filter(
-        (entry: EntryType) => entry.date === today
-      );
-      if (_todayEntries) {
-        setTodayEntries(_todayEntries);
-      }
+      const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
+      console.log({ today });
+      const _todayEntries = result.allEntries?.[today] || [];
+      console.log({ _todayEntries });
+      setTodayEntries(_todayEntries);
     });
-  }, []);
+  }, [selectedDate]);
 
   const handleAddEntry = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -43,12 +44,13 @@ const App = () => {
       const entryId = new Date().toISOString();
       const newEntry = { id: entryId, entry: entryText, date: today };
 
-      setTodayEntries([...todayEntries, newEntry]);
+      setTodayEntries([newEntry, ...todayEntries]);
 
       chrome.storage.local.get(['allEntries'], (result) => {
-        chrome.storage.local.set({
-          allEntries: [...(result.allEntries || []), newEntry],
-        });
+        const allEntries = result.allEntries || {};
+        const dateEntries = allEntries[today] || [];
+        allEntries[today] = [newEntry, ...dateEntries];
+        chrome.storage.local.set({ allEntries });
       });
     };
 
@@ -96,7 +98,7 @@ const App = () => {
   }, [logType, selectedPerson, selectedProject, selectedDuration]);
 
   return (
-    <div className='container'>
+    <div className='container' style={{ position: 'relative' }}>
       <Header theme={theme} toggleTheme={toggleTheme} />
       <LogTypeSelector logType={logType} setLogType={setLogType} />
       {logType === 'meeting' && (
@@ -124,7 +126,14 @@ const App = () => {
       >
         ➕ Add Entry
       </button>
-      <h3>Today's Log</h3>
+      <div className='entries-container'>
+        <h3>Logs for {selectedDate?.toLocaleDateString()}</h3>
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => setSelectedDate(date)}
+          dateFormat='dd/MM/yyyy'
+        />
+      </div>
       <EntriesList entries={todayEntries.map((e) => e.entry)} />
       <button onClick={copyEntries} className='copy-all'>
         📋 Copy All

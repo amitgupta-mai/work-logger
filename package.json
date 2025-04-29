@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/react-select": "^5.0.1",
     "react": "^19.0.0",
+    "react-datepicker": "^8.3.0",
     "react-dom": "^19.0.0",
     "react-select": "^5.10.1"
   },
@@ -19,6 +20,7 @@
     "@eslint/js": "^9.22.0",
     "@types/chrome": "^0.0.317",
     "@types/react": "^19.0.10",
+    "@types/react-datepicker": "^7.0.0",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.22.0",
