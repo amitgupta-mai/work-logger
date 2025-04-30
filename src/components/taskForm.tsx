@@ -25,6 +25,8 @@ export const TaskForm = ({
 }: TaskFormProps) => {
   const [projects, setProjects] = useState<OptionType[]>([]);
   const [timerOption, setTimerOption] = useState<TimerOption>('selectDuration');
+  const [isRunning, setIsRunning] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
     chrome.storage.local.get(['projects'], (result) => {
@@ -34,24 +36,47 @@ export const TaskForm = ({
     });
   }, [setSelectedProject, selectedProject]);
 
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    if (isRunning) {
+      timer = setInterval(() => {
+        setElapsedTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else if (!isRunning && elapsedTime !== 0) {
+      if (timer !== null) {
+        clearInterval(timer);
+      }
+    }
+    return () => {
+      if (timer !== null) {
+        clearInterval(timer);
+      }
+    };
+  }, [isRunning, elapsedTime]);
+
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
     setSelectedProject(newProject);
     chrome.storage.local.set({ projects: [...projects, newProject] });
   };
 
+  const handleStartStop = () => {
+    if (isRunning) {
+      // Stop the timer
+      setIsRunning(false);
+      const minutes = Math.ceil(elapsedTime / 60);
+      setSelectedDuration({ value: minutes, label: `${minutes} min` });
+      setElapsedTime(0);
+    } else {
+      // Start the timer
+      setIsRunning(true);
+    }
+  };
+
   return (
     <>
       <div>
-        <label>
-          <input
-            type='radio'
-            value='startTimer'
-            checked={timerOption === 'startTimer'}
-            onChange={() => setTimerOption('startTimer')}
-          />
-          Start Timer
-        </label>
         <label>
           <input
             type='radio'
@@ -61,13 +86,16 @@ export const TaskForm = ({
           />
           Select Duration
         </label>
+        <label>
+          <input
+            type='radio'
+            value='startTimer'
+            checked={timerOption === 'startTimer'}
+            onChange={() => setTimerOption('startTimer')}
+          />
+          Timer
+        </label>
       </div>
-      {timerOption === 'selectDuration' && (
-        <DurationSelector
-          selectedDuration={selectedDuration}
-          setSelectedDuration={setSelectedDuration}
-        />
-      )}
       <CreatableSelect
         placeholder='Select or type project name'
         value={selectedProject}
@@ -77,6 +105,23 @@ export const TaskForm = ({
         isClearable
         isSearchable
       />
+      {timerOption === 'selectDuration' && (
+        <DurationSelector
+          selectedDuration={selectedDuration}
+          setSelectedDuration={setSelectedDuration}
+        />
+      )}
+      {timerOption === 'startTimer' && (
+        <div>
+          <button onClick={handleStartStop}>
+            {isRunning ? 'Stop Timer' : 'Start Timer'}
+          </button>
+          <div>
+            Elapsed Time: {Math.floor(elapsedTime / 60)} min {elapsedTime % 60}{' '}
+            sec
+          </div>
+        </div>
+      )}
     </>
   );
 };
