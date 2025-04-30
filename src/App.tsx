@@ -131,8 +131,22 @@ const App = () => {
     });
   };
 
+  const totalDuration = useMemo(() => {
+    const totalMinutes = todayEntries.reduce((sum, entry) => {
+      const durationMatch = entry.entry.match(/(\d+) min/);
+      return sum + (durationMatch ? parseInt(durationMatch[1], 10) : 0);
+    }, 0);
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}h ${minutes}m`;
+  }, [todayEntries]);
+
   return (
     <div className='container' style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px' }}>
+        Total Time: {totalDuration}
+      </div>
       <Header theme={theme} toggleTheme={toggleTheme} />
       <LogTypeSelector logType={logType} setLogType={setLogType} />
       {logType === 'meeting' && (
