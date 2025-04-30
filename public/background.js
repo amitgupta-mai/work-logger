@@ -1,21 +1,31 @@
-let timer = null;
-let elapsedTime = 0;
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'startTimer') {
-    console.log('startTimer called from popup');
-    if (!timer) {
-      timer = setInterval(() => {
-        elapsedTime += 1;
-        chrome.storage.local.set({ elapsedTime });
-      }, 1000);
-    }
+    chrome.storage.local.get('isRunning', (result) => {
+      if (!result.isRunning) {
+        chrome.alarms.create('timerAlarm', { periodInMinutes: 1 / 60 }); // Trigger every second
+        chrome.storage.local.set({ isRunning: true });
+      }
+    });
   } else if (request.action === 'stopTimer') {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-  } else if (request.action === 'getElapsedTime') {
-    sendResponse({ elapsedTime });
+    chrome.storage.local.get('isRunning', (result) => {
+      if (result.isRunning) {
+        chrome.alarms.clear('timerAlarm');
+        chrome.storage.local.set({ isRunning: false });
+      }
+    });
+  }
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'timerAlarm') {
+    chrome.storage.local.get('isRunning', (result) => {
+      if (result.isRunning) {
+        chrome.storage.local.get('elapsedTime', (result) => {
+          chrome.storage.local.set({
+            elapsedTime: (result.elapsedTime || 0) + 1,
+          });
+        });
+      }
+    });
   }
 });

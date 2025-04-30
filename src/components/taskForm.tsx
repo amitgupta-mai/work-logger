@@ -41,23 +41,20 @@ export const TaskForm = ({
   }, [setSelectedProject, selectedProject]);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval> | null = null;
+    let intervalId: ReturnType<typeof setInterval>;
+    chrome.storage.local.get(['elapsedTime', 'isRunning'], (result) => {
+      if (result.elapsedTime !== undefined) {
+        intervalId = setInterval(() => {
+          chrome.storage.local.get(['elapsedTime', 'isRunning'], (result) => {
+            setElapsedTime(result.elapsedTime || 0);
+            setIsRunning(result.isRunning || false);
+          });
+        }, 1000);
+      }
+    });
 
-    if (isRunning) {
-      timer = setInterval(() => {
-        setElapsedTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } else if (!isRunning && elapsedTime !== 0) {
-      if (timer !== null) {
-        clearInterval(timer);
-      }
-    }
-    return () => {
-      if (timer !== null) {
-        clearInterval(timer);
-      }
-    };
-  }, [isRunning, elapsedTime]);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
@@ -67,12 +64,12 @@ export const TaskForm = ({
 
   const handleStartStop = () => {
     if (isRunning) {
-      setIsRunning(false);
+      chrome.runtime.sendMessage({ action: 'stopTimer' });
       const minutes = Math.ceil(elapsedTime / 60);
+      setIsRunning(false);
       setSelectedDuration({ value: minutes, label: `${minutes} min` });
-      setElapsedTime(0);
     } else {
-      setIsRunning(true);
+      chrome.runtime.sendMessage({ action: 'startTimer' });
     }
   };
 
