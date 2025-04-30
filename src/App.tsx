@@ -4,19 +4,18 @@ import { LogTypeSelector } from './components/logTypeSelector';
 import { MeetingForm } from './components/meetingForm';
 import { TaskForm } from './components/taskForm';
 import { EntriesList } from './components/entriesList';
-import { setTheme, loadTheme } from './utils/theme';
+import { loadTheme, toggleTheme } from './utils/theme';
 import { EntryType, OptionType } from './types';
+import { addEntry, handleDeleteEntry } from './utils/entryUtils';
+import TotalTimeDisplay from './components/totalTimeDisplay';
+import DateSelector from './components/dateSelector';
+
 import './App.css';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import { getChromeStorageData } from './utils/chromeStorageUtils';
 
 const App = () => {
   const [logType, setLogType] = useState<'meeting' | 'task'>('meeting');
-
   const [selectedProject, setSelectedProject] = useState<OptionType | null>(
     null
   );
@@ -31,47 +30,27 @@ const App = () => {
 
   useEffect(() => {
     loadTheme();
-    chrome.storage.local.get(['allEntries'], (result) => {
+    getChromeStorageData(['allEntries'], (result: Record<string, unknown>) => {
+      const allEntries =
+        (result.allEntries as Record<string, EntryType[]>) || {};
       const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
-      const _todayEntries = result.allEntries?.[today] || [];
+      const _todayEntries = allEntries[today] || [];
       setTodayEntries(_todayEntries);
     });
   }, [selectedDate]);
 
   const handleAddEntry = () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    const addEntry = (entryText: string) => {
-      const entryId = new Date().toISOString();
-      const newEntry = { id: entryId, entry: entryText, date: today };
-
-      setTodayEntries([newEntry, ...todayEntries]);
-
-      chrome.storage.local.get(['allEntries'], (result) => {
-        const allEntries = result.allEntries || {};
-        const dateEntries = allEntries[today] || [];
-        allEntries[today] = [newEntry, ...dateEntries];
-        chrome.storage.local.set({ allEntries });
-      });
-    };
-
-    if (
-      logType === 'meeting' &&
-      selectedPerson &&
-      selectedProject &&
-      selectedDuration
-    ) {
-      const projectText = selectedProject
-        ? ` (Project: ${selectedProject.label})`
-        : '';
-      addEntry(
-        `Meeting: ${selectedPerson.label} - ${selectedDuration.label}${projectText}`
-      );
+    if (!selectedProject || !selectedDuration) {
+      return;
     }
 
-    if (logType === 'task' && selectedProject && selectedDuration) {
-      addEntry(`Project: ${selectedProject.label} - ${selectedDuration.label}`);
+    let entryText = `Project: ${selectedProject.label} - ${selectedDuration.label}`;
+
+    if (logType === 'meeting' && selectedPerson) {
+      entryText = `Meeting: ${selectedPerson.label} - ${selectedDuration.label} (Project: ${selectedProject.label})`;
     }
+
+    addEntry(entryText, todayEntries, setTodayEntries);
     resetFields();
   };
 
@@ -79,12 +58,6 @@ const App = () => {
     setSelectedPerson(null);
     setSelectedProject(null);
     setSelectedDuration(null);
-  };
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    setThemeState(newTheme);
   };
 
   const copyEntries = () => {
@@ -98,55 +71,17 @@ const App = () => {
     return !selectedProject || !selectedDuration;
   }, [logType, selectedPerson, selectedProject, selectedDuration]);
 
-  const handleDeleteEntry = (entryId: string) => {
-    confirmAlert({
-      title: 'Confirm to delete',
-      message: 'Are you sure you want to delete this entry?',
-      buttons: [
-        {
-          label: 'Yes',
-          onClick: () => {
-            setTodayEntries(
-              todayEntries.filter((entry) => entry.id !== entryId)
-            );
-            chrome.storage.local.get(['allEntries'], (result) => {
-              const allEntries = result.allEntries || {};
-              const today = (selectedDate ?? new Date())
-                .toISOString()
-                .split('T')[0];
-              allEntries[today] = allEntries[today].filter(
-                (entry: EntryType) => entry.id !== entryId
-              );
-              chrome.storage.local.set({ allEntries });
-            });
-            toast.success('Entry deleted successfully!');
-          },
-        },
-        {
-          label: 'No',
-          onClick: () => {},
-        },
-      ],
-    });
+  const handleDeleteEntryWrapper = (id: string) => {
+    handleDeleteEntry(id, todayEntries, setTodayEntries, selectedDate);
   };
-
-  const totalDuration = useMemo(() => {
-    const totalMinutes = todayEntries.reduce((sum, entry) => {
-      const durationMatch = entry.entry.match(/(\d+) min/);
-      return sum + (durationMatch ? parseInt(durationMatch[1], 10) : 0);
-    }, 0);
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}h ${minutes}m`;
-  }, [todayEntries]);
 
   return (
     <div className='container' style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px' }}>
-        Total Time: {totalDuration}
-      </div>
-      <Header theme={theme} toggleTheme={toggleTheme} />
+      <TotalTimeDisplay todayEntries={todayEntries} />
+      <Header
+        theme={theme}
+        toggleTheme={() => toggleTheme(theme, setThemeState)}
+      />
       <LogTypeSelector logType={logType} setLogType={setLogType} />
       {logType === 'meeting' && (
         <MeetingForm
@@ -175,15 +110,14 @@ const App = () => {
       </button>
       <div className='entries-container'>
         <h3>Logs for {selectedDate?.toLocaleDateString()}</h3>
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
-          dateFormat='dd/MM/yyyy'
+        <DateSelector
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
         />
         {todayEntries.length > 0 && (
           <EntriesList
             entries={todayEntries}
-            handleDeleteEntry={handleDeleteEntry}
+            handleDeleteEntry={handleDeleteEntryWrapper}
             selectedDate={selectedDate ?? new Date()}
           />
         )}

@@ -76,6 +76,15 @@ export const TaskForm = ({
 
   return (
     <>
+      <CreatableSelect
+        placeholder='Select or type project name'
+        value={selectedProject}
+        onChange={(e) => setSelectedProject(e)}
+        onCreateOption={handleCreateProject}
+        options={projects}
+        isClearable
+        isSearchable
+      />
       <div>
         <label>
           <input
@@ -96,15 +105,6 @@ export const TaskForm = ({
           Timer
         </label>
       </div>
-      <CreatableSelect
-        placeholder='Select or type project name'
-        value={selectedProject}
-        onChange={(e) => setSelectedProject(e)}
-        onCreateOption={handleCreateProject}
-        options={projects}
-        isClearable
-        isSearchable
-      />
       {timerOption === 'selectDuration' && (
         <DurationSelector
           selectedDuration={selectedDuration}

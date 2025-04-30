@@ -11,3 +11,12 @@ export const loadTheme = () => {
     document.documentElement.setAttribute('data-theme', 'light');
   }
 };
+
+export const toggleTheme = (
+  theme: 'light' | 'dark',
+  setThemeState: (theme: 'light' | 'dark') => void
+) => {
+  const newTheme = theme === 'light' ? 'dark' : 'light';
+  setTheme(newTheme);
+  setThemeState(newTheme);
+};
