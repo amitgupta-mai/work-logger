@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Work Logger",
+  "name": "Time Tracker",
   "version": "1.0.0",
   "description": "Log your work easily",
   "icons": {
@@ -11,6 +11,9 @@
   "action": {
     "default_popup": "index.html",
     "default_icon": "icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "permissions": ["storage", "activeTab"]
 }

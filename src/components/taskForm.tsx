@@ -115,7 +115,7 @@ export const TaskForm = ({
       )}
       {timerOption === 'startTimer' && (
         <div>
-          <button onClick={handleStartStop}>
+          <button onClick={handleStartStop} disabled={!selectedProject}>
             {isRunning ? 'Stop Timer' : 'Start Timer'}
           </button>
           <div>
