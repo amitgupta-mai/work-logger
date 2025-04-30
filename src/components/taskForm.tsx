@@ -3,18 +3,28 @@ import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 import { DurationSelector } from '../ui/durationSelector';
 
+type TimerOption = 'startTimer' | 'selectDuration';
+
+interface DurationOption {
+  value: number;
+  label: string;
+}
+
+interface TaskFormProps {
+  selectedProject: OptionType | null;
+  setSelectedProject: (project: OptionType | null) => void;
+  selectedDuration: DurationOption | null;
+  setSelectedDuration: (value: DurationOption | null) => void;
+}
+
 export const TaskForm = ({
   selectedProject,
   setSelectedProject,
   selectedDuration,
   setSelectedDuration,
-}: {
-  selectedProject: OptionType | null;
-  setSelectedProject: (project: OptionType | null) => void;
-  selectedDuration: { value: number; label: string } | null;
-  setSelectedDuration: (value: { value: number; label: string } | null) => void;
-}) => {
+}: TaskFormProps) => {
   const [projects, setProjects] = useState<OptionType[]>([]);
+  const [timerOption, setTimerOption] = useState<TimerOption>('selectDuration');
 
   useEffect(() => {
     chrome.storage.local.get(['projects'], (result) => {
@@ -32,6 +42,32 @@ export const TaskForm = ({
 
   return (
     <>
+      <div>
+        <label>
+          <input
+            type='radio'
+            value='startTimer'
+            checked={timerOption === 'startTimer'}
+            onChange={() => setTimerOption('startTimer')}
+          />
+          Start Timer
+        </label>
+        <label>
+          <input
+            type='radio'
+            value='selectDuration'
+            checked={timerOption === 'selectDuration'}
+            onChange={() => setTimerOption('selectDuration')}
+          />
+          Select Duration
+        </label>
+      </div>
+      {timerOption === 'selectDuration' && (
+        <DurationSelector
+          selectedDuration={selectedDuration}
+          setSelectedDuration={setSelectedDuration}
+        />
+      )}
       <CreatableSelect
         placeholder='Select or type project name'
         value={selectedProject}
@@ -40,10 +76,6 @@ export const TaskForm = ({
         options={projects}
         isClearable
         isSearchable
-      />
-      <DurationSelector
-        selectedDuration={selectedDuration}
-        setSelectedDuration={setSelectedDuration}
       />
     </>
   );
