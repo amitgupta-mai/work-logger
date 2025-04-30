@@ -26,7 +26,7 @@ export const MeetingForm = ({
         setProjects(result.projects);
       }
     });
-  }, [setSelectedPerson, setSelectedProject]);
+  }, [setSelectedPerson, setSelectedProject, selectedPerson, selectedProject]);
 
   const handleCreatePerson = (inputValue: string) => {
     const newPerson = { label: inputValue, value: inputValue };

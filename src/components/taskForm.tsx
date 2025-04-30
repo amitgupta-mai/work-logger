@@ -17,7 +17,7 @@ export const TaskForm = ({
         setProjects(result.projects);
       }
     });
-  }, [setSelectedProject]);
+  }, [setSelectedProject, selectedProject]);
 
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
