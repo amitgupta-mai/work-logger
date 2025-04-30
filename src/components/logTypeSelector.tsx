@@ -15,8 +15,8 @@ export const LogTypeSelector = ({
       onChange={(e) => setLogType(e.target.value as 'meeting' | 'task')}
       className='select-type'
     >
-      <option value='meeting'>Meeting</option>
       <option value='task'>Task</option>
+      <option value='meeting'>Meeting</option>
     </select>
   );
 };

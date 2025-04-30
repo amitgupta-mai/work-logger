@@ -9,13 +9,13 @@ import { EntryType, OptionType } from './types';
 import { addEntry, handleDeleteEntry } from './utils/entryUtils';
 import TotalTimeDisplay from './components/totalTimeDisplay';
 import DateSelector from './components/dateSelector';
+import { getChromeStorageData } from './utils/chromeStorageUtils';
 
 import './App.css';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import { getChromeStorageData } from './utils/chromeStorageUtils';
 
 const App = () => {
-  const [logType, setLogType] = useState<'meeting' | 'task'>('meeting');
+  const [logType, setLogType] = useState<'meeting' | 'task'>('task');
   const [selectedProject, setSelectedProject] = useState<OptionType | null>(
     null
   );
