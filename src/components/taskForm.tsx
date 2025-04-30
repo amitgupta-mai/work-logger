@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 import { DurationSelector } from '../ui/durationSelector';
+import {
+  getChromeStorageData,
+  setChromeStorageData,
+} from '../utils/chromeStorageUtils';
 
 type TimerOption = 'startTimer' | 'selectDuration';
 
@@ -29,9 +33,9 @@ export const TaskForm = ({
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
-    chrome.storage.local.get(['projects'], (result) => {
-      if (result.projects) {
-        setProjects(result.projects);
+    getChromeStorageData(['projects'], (result: Record<string, unknown>) => {
+      if (result.projects && Array.isArray(result.projects)) {
+        setProjects(result.projects as OptionType[]);
       }
     });
   }, [setSelectedProject, selectedProject]);
@@ -58,18 +62,16 @@ export const TaskForm = ({
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
     setSelectedProject(newProject);
-    chrome.storage.local.set({ projects: [...projects, newProject] });
+    setChromeStorageData({ projects: [...projects, newProject] });
   };
 
   const handleStartStop = () => {
     if (isRunning) {
-      // Stop the timer
       setIsRunning(false);
       const minutes = Math.ceil(elapsedTime / 60);
       setSelectedDuration({ value: minutes, label: `${minutes} min` });
       setElapsedTime(0);
     } else {
-      // Start the timer
       setIsRunning(true);
     }
   };

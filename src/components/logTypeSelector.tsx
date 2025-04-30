@@ -1,10 +1,14 @@
+type LogType = 'meeting' | 'task';
+
+interface LogTypeSelectorProps {
+  logType: LogType;
+  setLogType: (type: LogType) => void;
+}
+
 export const LogTypeSelector = ({
   logType,
   setLogType,
-}: {
-  logType: 'meeting' | 'task';
-  setLogType: (type: 'meeting' | 'task') => void;
-}) => {
+}: LogTypeSelectorProps) => {
   return (
     <select
       value={logType}

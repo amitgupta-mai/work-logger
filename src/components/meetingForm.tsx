@@ -2,6 +2,24 @@ import { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 import { DurationSelector } from '../ui/durationSelector';
+import {
+  getChromeStorageData,
+  setChromeStorageData,
+} from '../utils/chromeStorageUtils';
+
+interface Duration {
+  value: number;
+  label: string;
+}
+
+interface MeetingFormProps {
+  selectedPerson: OptionType | null;
+  setSelectedPerson: (person: OptionType | null) => void;
+  selectedProject: OptionType | null;
+  setSelectedProject: (project: OptionType | null) => void;
+  selectedDuration: Duration | null;
+  setSelectedDuration: (duration: Duration | null) => void;
+}
 
 export const MeetingForm = ({
   selectedPerson,
@@ -10,41 +28,34 @@ export const MeetingForm = ({
   setSelectedProject,
   selectedDuration,
   setSelectedDuration,
-}: {
-  selectedPerson: OptionType | null;
-  setSelectedPerson: (person: OptionType | null) => void;
-  selectedProject: OptionType | null;
-  setSelectedProject: (project: OptionType | null) => void;
-  selectedDuration: { value: number; label: string } | null;
-  setSelectedDuration: (value: { value: number; label: string } | null) => void;
-}) => {
+}: MeetingFormProps) => {
   const [people, setPeople] = useState<OptionType[]>([]);
   const [projects, setProjects] = useState<OptionType[]>([]);
 
   useEffect(() => {
-    // Load stored people and projects from storage
-    chrome.storage.local.get(['people', 'projects'], (result) => {
-      if (result.people) {
-        setPeople(result.people);
+    getChromeStorageData(
+      ['people', 'projects'],
+      (result: Record<string, unknown>) => {
+        if (result.people && Array.isArray(result.people)) {
+          setPeople(result.people as OptionType[]);
+        }
+        if (result.projects && Array.isArray(result.projects)) {
+          setProjects(result.projects as OptionType[]);
+        }
       }
-      if (result.projects) {
-        setProjects(result.projects);
-      }
-    });
+    );
   }, [setSelectedPerson, setSelectedProject, selectedPerson, selectedProject]);
 
   const handleCreatePerson = (inputValue: string) => {
     const newPerson = { label: inputValue, value: inputValue };
     setSelectedPerson(newPerson);
-    // Save to storage
-    chrome.storage.local.set({ people: [...people, newPerson] });
+    setChromeStorageData({ people: [...people, newPerson] });
   };
 
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
     setSelectedProject(newProject);
-    // Save to storage
-    chrome.storage.local.set({ projects: [...projects, newProject] });
+    setChromeStorageData({ projects: [...projects, newProject] });
   };
 
   return (

@@ -1,14 +1,29 @@
+import { useMemo } from 'react';
 import Entry from './entry';
+
+interface Entry {
+  id: string;
+  entry: string;
+}
+
+interface EntriesListProps {
+  entries: Entry[];
+  handleDeleteEntry: (id: string) => void;
+  selectedDate: Date;
+}
 
 export const EntriesList = ({
   entries,
   handleDeleteEntry,
   selectedDate,
-}: {
-  entries: { id: string; entry: string }[];
-  handleDeleteEntry: (id: string) => void;
-  selectedDate: Date;
-}) => {
+}: EntriesListProps) => {
+  const isDeletable = useMemo(() => {
+    return (
+      selectedDate?.toISOString().split('T')[0] ===
+      new Date().toISOString().split('T')[0]
+    );
+  }, [selectedDate]);
+
   return (
     <ul className='entries-list'>
       {entries.map((entry) => (
@@ -16,10 +31,7 @@ export const EntriesList = ({
           key={entry.id}
           entry={entry.entry}
           onDelete={() => handleDeleteEntry(entry.id)}
-          isDeletable={
-            selectedDate?.toISOString().split('T')[0] ===
-            new Date().toISOString().split('T')[0]
-          }
+          isDeletable={isDeletable}
         />
       ))}
     </ul>
