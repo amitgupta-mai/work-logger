@@ -3,7 +3,6 @@ import { Header } from './components/header';
 import { LogTypeSelector } from './components/logTypeSelector';
 import { MeetingForm } from './components/meetingForm';
 import { TaskForm } from './components/taskForm';
-import { DurationSelector } from './ui/durationSelector';
 import { EntriesList } from './components/entriesList';
 import { setTheme, loadTheme } from './utils/theme';
 import { EntryType, OptionType } from './types';
@@ -155,18 +154,18 @@ const App = () => {
           setSelectedPerson={setSelectedPerson}
           selectedProject={selectedProject}
           setSelectedProject={setSelectedProject}
+          selectedDuration={selectedDuration}
+          setSelectedDuration={setSelectedDuration}
         />
       )}
       {logType === 'task' && (
         <TaskForm
           selectedProject={selectedProject}
           setSelectedProject={setSelectedProject}
+          selectedDuration={selectedDuration}
+          setSelectedDuration={setSelectedDuration}
         />
       )}
-      <DurationSelector
-        selectedDuration={selectedDuration}
-        setSelectedDuration={setSelectedDuration}
-      />
       <button
         onClick={handleAddEntry}
         disabled={isAddEntryDisabled}

@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
+import { DurationSelector } from '../ui/durationSelector';
 
 export const MeetingForm = ({
   selectedPerson,
   setSelectedPerson,
   selectedProject,
   setSelectedProject,
+  selectedDuration,
+  setSelectedDuration,
 }: {
   selectedPerson: OptionType | null;
   setSelectedPerson: (person: OptionType | null) => void;
   selectedProject: OptionType | null;
   setSelectedProject: (project: OptionType | null) => void;
+  selectedDuration: { value: number; label: string } | null;
+  setSelectedDuration: (value: { value: number; label: string } | null) => void;
 }) => {
   const [people, setPeople] = useState<OptionType[]>([]);
   const [projects, setProjects] = useState<OptionType[]>([]);
@@ -61,6 +66,10 @@ export const MeetingForm = ({
         options={projects}
         isClearable
         isSearchable
+      />
+      <DurationSelector
+        selectedDuration={selectedDuration}
+        setSelectedDuration={setSelectedDuration}
       />
     </>
   );
