@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.storage.local.get('isRunning', (result) => {
       if (result.isRunning) {
         chrome.alarms.clear('timerAlarm');
-        chrome.storage.local.set({ isRunning: false, elapsedTime: 0 });
+        chrome.storage.local.set({ isRunning: false, activeProject: null });
       }
     });
   }

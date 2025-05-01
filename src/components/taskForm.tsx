@@ -19,6 +19,7 @@ interface TaskFormProps {
   setSelectedProject: (project: OptionType | null) => void;
   selectedDuration: DurationOption | null;
   setSelectedDuration: (value: DurationOption | null) => void;
+  taskRecorded: boolean;
 }
 
 export const TaskForm = ({
@@ -26,6 +27,7 @@ export const TaskForm = ({
   setSelectedProject,
   selectedDuration,
   setSelectedDuration,
+  taskRecorded,
 }: TaskFormProps) => {
   const [projects, setProjects] = useState<OptionType[]>([]);
   const [timerOption, setTimerOption] = useState<TimerOption>('selectDuration');
@@ -63,6 +65,13 @@ export const TaskForm = ({
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    if (taskRecorded) {
+      setElapsedTime(0);
+      setChromeStorageData({ elapsedTime: 0 });
+    }
+  }, [taskRecorded]);
+
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
     setSelectedProject(newProject);
@@ -75,7 +84,6 @@ export const TaskForm = ({
       setIsRunning(false);
       setSelectedDuration({ value: minutes, label: `${minutes} min` });
       chrome.runtime.sendMessage({ action: 'stopTimer' });
-      chrome.storage.local.set({ activeProject: null });
     } else {
       chrome.runtime.sendMessage({ action: 'startTimer' });
       chrome.storage.local.set({ activeProject: selectedProject });

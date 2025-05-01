@@ -27,7 +27,7 @@ const App = () => {
   const [todayEntries, setTodayEntries] = useState<EntryType[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<OptionType | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [isLoading, setIsLoading] = useState(true);
+  const [taskRecorded, setTaskRecorded] = useState(false);
 
   useEffect(() => {
     loadTheme();
@@ -39,7 +39,6 @@ const App = () => {
         const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
         const _todayEntries = allEntries[today] || [];
         setTodayEntries(_todayEntries);
-        setIsLoading(false);
       }
     );
   }, [selectedDate]);
@@ -56,6 +55,7 @@ const App = () => {
     }
 
     addEntry(entryText, todayEntries, setTodayEntries);
+    setTaskRecorded(true);
     resetFields();
   };
 
@@ -79,10 +79,6 @@ const App = () => {
   const handleDeleteEntryWrapper = (id: string) => {
     handleDeleteEntry(id, todayEntries, setTodayEntries, selectedDate);
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className='container' style={{ position: 'relative' }}>
@@ -108,6 +104,7 @@ const App = () => {
           setSelectedProject={setSelectedProject}
           selectedDuration={selectedDuration}
           setSelectedDuration={setSelectedDuration}
+          taskRecorded={taskRecorded}
         />
       )}
       <button
