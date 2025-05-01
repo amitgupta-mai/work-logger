@@ -42,16 +42,23 @@ export const TaskForm = ({
 
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
-    chrome.storage.local.get(['elapsedTime', 'isRunning'], (result) => {
-      if (result.elapsedTime !== undefined) {
-        intervalId = setInterval(() => {
-          chrome.storage.local.get(['elapsedTime', 'isRunning'], (result) => {
-            setElapsedTime(result.elapsedTime || 0);
-            setIsRunning(result.isRunning || false);
-          });
-        }, 1000);
+    chrome.storage.local.get(
+      ['elapsedTime', 'isRunning', 'activeProject'],
+      (result) => {
+        if (result.isRunning) {
+          setTimerOption('startTimer');
+          setSelectedProject(result.activeProject);
+        }
+        if (result.elapsedTime) {
+          intervalId = setInterval(() => {
+            chrome.storage.local.get(['elapsedTime', 'isRunning'], (result) => {
+              setElapsedTime(result.elapsedTime || 0);
+              setIsRunning(result.isRunning || false);
+            });
+          }, 1000);
+        }
       }
-    });
+    );
 
     return () => clearInterval(intervalId);
   }, []);
@@ -68,8 +75,10 @@ export const TaskForm = ({
       setIsRunning(false);
       setSelectedDuration({ value: minutes, label: `${minutes} min` });
       chrome.runtime.sendMessage({ action: 'stopTimer' });
+      chrome.storage.local.set({ activeProject: null });
     } else {
       chrome.runtime.sendMessage({ action: 'startTimer' });
+      chrome.storage.local.set({ activeProject: selectedProject });
     }
   };
 

@@ -27,16 +27,21 @@ const App = () => {
   const [todayEntries, setTodayEntries] = useState<EntryType[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<OptionType | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadTheme();
-    getChromeStorageData(['allEntries'], (result: Record<string, unknown>) => {
-      const allEntries =
-        (result.allEntries as Record<string, EntryType[]>) || {};
-      const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
-      const _todayEntries = allEntries[today] || [];
-      setTodayEntries(_todayEntries);
-    });
+    getChromeStorageData(
+      ['allEntries', 'isRunning'],
+      (result: Record<string, unknown>) => {
+        const allEntries =
+          (result.allEntries as Record<string, EntryType[]>) || {};
+        const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
+        const _todayEntries = allEntries[today] || [];
+        setTodayEntries(_todayEntries);
+        setIsLoading(false);
+      }
+    );
   }, [selectedDate]);
 
   const handleAddEntry = () => {
@@ -74,6 +79,10 @@ const App = () => {
   const handleDeleteEntryWrapper = (id: string) => {
     handleDeleteEntry(id, todayEntries, setTodayEntries, selectedDate);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className='container' style={{ position: 'relative' }}>
