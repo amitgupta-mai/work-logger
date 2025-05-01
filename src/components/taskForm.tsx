@@ -64,10 +64,10 @@ export const TaskForm = ({
 
   const handleStartStop = () => {
     if (isRunning) {
-      chrome.runtime.sendMessage({ action: 'stopTimer' });
       const minutes = Math.ceil(elapsedTime / 60);
       setIsRunning(false);
       setSelectedDuration({ value: minutes, label: `${minutes} min` });
+      chrome.runtime.sendMessage({ action: 'stopTimer' });
     } else {
       chrome.runtime.sendMessage({ action: 'startTimer' });
     }

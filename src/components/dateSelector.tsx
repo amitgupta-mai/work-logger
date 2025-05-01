@@ -1,4 +1,5 @@
 import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface DateSelectorProps {
   selectedDate: Date | null;
