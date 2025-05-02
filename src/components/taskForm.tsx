@@ -44,18 +44,22 @@ export const TaskForm = ({
 
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
-    chrome.storage.local.get(
+    getChromeStorageData(
       ['elapsedTime', 'isRunning', 'activeProject'],
       (result) => {
         if (result.isRunning) {
           setTimerOption('startTimer');
-          setSelectedProject(result.activeProject);
+          setSelectedProject(result.activeProject as OptionType);
         }
         if (result.elapsedTime) {
           intervalId = setInterval(() => {
-            chrome.storage.local.get(['elapsedTime', 'isRunning'], (result) => {
-              setElapsedTime(result.elapsedTime || 0);
-              setIsRunning(result.isRunning || false);
+            getChromeStorageData(['elapsedTime', 'isRunning'], (result) => {
+              setElapsedTime(
+                typeof result.elapsedTime === 'number' ? result.elapsedTime : 0
+              );
+              setIsRunning(
+                typeof result.isRunning === 'boolean' ? result.isRunning : false
+              );
             });
           }, 1000);
         }

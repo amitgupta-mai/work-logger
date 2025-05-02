@@ -9,7 +9,7 @@ export const Header = ({
 }) => {
   return (
     <div className='header'>
-      <h2>Work Logger</h2>
+      <h2>TimeZen</h2>
       <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
     </div>
   );
