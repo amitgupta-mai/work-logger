@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import CreatableSelect from 'react-select/creatable';
-import { OptionType } from '../types';
+import { useEffect, useState } from "react";
+import CreatableSelect from "react-select/creatable";
+import { OptionType } from "../types";
 
 export const MeetingForm = ({
   selectedPerson,
@@ -18,7 +18,7 @@ export const MeetingForm = ({
 
   useEffect(() => {
     // Load stored people and projects from storage
-    chrome.storage.local.get(['people', 'projects'], (result) => {
+    chrome.storage.local.get(["people", "projects"], (result) => {
       if (result.people) {
         setPeople(result.people);
       }
@@ -43,7 +43,7 @@ export const MeetingForm = ({
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       <CreatableSelect
         placeholder={`Select or type person's name`}
         value={selectedPerson}
@@ -54,7 +54,7 @@ export const MeetingForm = ({
         isSearchable
       />
       <CreatableSelect
-        placeholder='Select or type project name'
+        placeholder="Select or type project name"
         value={selectedProject}
         onChange={(e) => setSelectedProject(e)}
         onCreateOption={handleCreateProject}
@@ -62,6 +62,6 @@ export const MeetingForm = ({
         isClearable
         isSearchable
       />
-    </>
+    </div>
   );
 };

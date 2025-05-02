@@ -1,3 +1,5 @@
+import { MdDeleteForever } from "react-icons/md";
+
 interface EntryProps {
   entry: string;
   onDelete: () => void;
@@ -6,11 +8,11 @@ interface EntryProps {
 
 const Entry: React.FC<EntryProps> = ({ entry, onDelete, isDeletable }) => {
   return (
-    <div className='entry'>
+    <div className="entry">
       <span>{entry}</span>
       {isDeletable && (
-        <button onClick={onDelete} className='delete-button'>
-          ❌
+        <button onClick={onDelete} className="delete-button">
+          <MdDeleteForever />
         </button>
       )}
     </div>
