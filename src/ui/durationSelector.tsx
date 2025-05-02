@@ -1,4 +1,4 @@
-import Select from 'react-select';
+import Select from "react-select";
 
 const durationOptions = Array.from({ length: 32 }, (_, i) => ({
   value: (i + 1) * 15,
@@ -14,10 +14,11 @@ export const DurationSelector = ({
 }) => {
   return (
     <Select
-      placeholder='Select duration'
+      placeholder="Select duration"
       value={selectedDuration}
       onChange={(e) => setSelectedDuration(e)}
       options={durationOptions}
+      className="mt-2"
     />
   );
 };
