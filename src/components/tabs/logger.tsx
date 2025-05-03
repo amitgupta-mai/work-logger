@@ -1,4 +1,3 @@
-import DateSelector from '../dateSelector';
 import { useEffect, useState, useMemo } from 'react';
 
 import { LogTypeSelector } from '../logTypeSelector';
@@ -12,6 +11,10 @@ import { getChromeStorageData } from '../../utils/chromeStorageUtils';
 import { loadTheme } from '../../utils/theme';
 import { addEntry, handleDeleteEntry } from '../../utils/entryUtils';
 import { EntriesList } from '../entriesList';
+import { Button } from '../ui/button';
+import { DatePicker } from '../ui/datePicker';
+import { CopyIcon } from 'lucide-react';
+import { format } from 'date-fns';
 
 const Logger = () => {
   const [logType, setLogType] = useState<'meeting' | 'task'>('task');
@@ -24,7 +27,7 @@ const Logger = () => {
   } | null>(null);
   const [todayEntries, setTodayEntries] = useState<EntryType[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<OptionType | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [taskRecorded, setTaskRecorded] = useState(false);
 
   useEffect(() => {
@@ -34,7 +37,7 @@ const Logger = () => {
       (result: Record<string, unknown>) => {
         const allEntries =
           (result.allEntries as Record<string, EntryType[]>) || {};
-        const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
+        const today = format(selectedDate ?? new Date(), 'yyyy-MM-dd');
         const _todayEntries = allEntries[today] || [];
         setTodayEntries(_todayEntries);
       }
@@ -102,16 +105,16 @@ const Logger = () => {
           taskRecorded={taskRecorded}
         />
       )}
-      <button
+      <Button
         onClick={handleAddEntry}
         disabled={isAddEntryDisabled}
-        className={isAddEntryDisabled ? 'add-entry disabled' : 'add-entry'}
+        variant='default'
       >
         ➕ Add Entry
-      </button>
+      </Button>
       <div className='entries-container'>
         <h3>Logs for {selectedDate?.toLocaleDateString()}</h3>
-        <DateSelector
+        <DatePicker
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
         />
@@ -123,9 +126,13 @@ const Logger = () => {
           />
         )}
       </div>
-      <button onClick={copyEntries} className='copy-all'>
-        📋 Copy All
-      </button>
+      <Button
+        onClick={copyEntries}
+        variant='floating'
+        className='bg-primary text-white'
+      >
+        <CopyIcon className='w-4 h-4' />
+      </Button>
     </div>
   );
 };

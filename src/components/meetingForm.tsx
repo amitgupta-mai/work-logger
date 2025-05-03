@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
-import { DurationSelector } from '../ui/durationSelector';
+import { DurationSelector } from './ui/durationSelector';
 import {
   getChromeStorageData,
   setChromeStorageData,

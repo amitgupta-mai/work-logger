@@ -1,4 +1,4 @@
-import { ThemeToggle } from '../ui/themeToggle';
+import { ThemeToggle } from './ui/themeToggle';
 
 export const Header = ({
   theme,

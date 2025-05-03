@@ -12,7 +12,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
 }) => (
   <DatePicker
     selected={selectedDate}
-    onChange={(date) => setSelectedDate(date)}
+    onChange={(date) => setSelectedDate(date ?? new Date())}
     dateFormat='dd/MM/yyyy'
   />
 );

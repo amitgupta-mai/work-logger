@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
-import { DurationSelector } from '../ui/durationSelector';
+import { DurationSelector } from './ui/durationSelector';
 import {
   getChromeStorageData,
   setChromeStorageData,
 } from '../utils/chromeStorageUtils';
+import { Button } from './ui/button';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Label } from './ui/label';
 
 type TimerOption = 'startTimer' | 'selectDuration';
 
@@ -50,31 +53,36 @@ export const TaskForm = ({
         if (result.isRunning) {
           setTimerOption('startTimer');
           setSelectedProject(result.activeProject as OptionType);
-        }
-        if (result.elapsedTime) {
-          intervalId = setInterval(() => {
-            getChromeStorageData(['elapsedTime', 'isRunning'], (result) => {
-              setElapsedTime(
-                typeof result.elapsedTime === 'number' ? result.elapsedTime : 0
-              );
-              setIsRunning(
-                typeof result.isRunning === 'boolean' ? result.isRunning : false
-              );
-            });
-          }, 1000);
+          if (!isNaN(Number(result.elapsedTime))) {
+            intervalId = setInterval(() => {
+              getChromeStorageData(['elapsedTime', 'isRunning'], (result) => {
+                setElapsedTime((prevElapsedTime) =>
+                  typeof result.elapsedTime === 'number'
+                    ? result.elapsedTime
+                    : prevElapsedTime
+                );
+                setIsRunning(
+                  typeof result.isRunning === 'boolean'
+                    ? result.isRunning
+                    : false
+                );
+              });
+            }, 1000);
+          }
         }
       }
     );
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isRunning]);
 
   useEffect(() => {
     if (taskRecorded) {
       setElapsedTime(0);
+      setSelectedDuration(null);
       setChromeStorageData({ elapsedTime: 0 });
     }
-  }, [taskRecorded]);
+  }, [taskRecorded, setSelectedDuration]);
 
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
@@ -90,7 +98,9 @@ export const TaskForm = ({
       chrome.runtime.sendMessage({ action: 'stopTimer' });
     } else {
       chrome.runtime.sendMessage({ action: 'startTimer' });
-      chrome.storage.local.set({ activeProject: selectedProject });
+      chrome.storage.local.set({ activeProject: selectedProject }, () => {
+        setIsRunning(true);
+      });
     }
   };
 
@@ -105,26 +115,21 @@ export const TaskForm = ({
         isClearable
         isSearchable
       />
-      <div>
-        <label>
-          <input
-            type='radio'
-            value='selectDuration'
-            checked={timerOption === 'selectDuration'}
-            onChange={() => setTimerOption('selectDuration')}
-          />
-          Select Duration
-        </label>
-        <label>
-          <input
-            type='radio'
-            value='startTimer'
-            checked={timerOption === 'startTimer'}
-            onChange={() => setTimerOption('startTimer')}
-          />
-          Timer
-        </label>
-      </div>
+      <RadioGroup
+        value={timerOption}
+        onValueChange={(value: string) => setTimerOption(value as TimerOption)}
+      >
+        <div className='flex space-x-4'>
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='selectDuration' id='selectDuration' />
+            <Label htmlFor='selectDuration'>Select Duration</Label>
+          </div>
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='startTimer' id='startTimer' />
+            <Label htmlFor='startTimer'>Timer</Label>
+          </div>
+        </div>
+      </RadioGroup>
       {timerOption === 'selectDuration' && (
         <DurationSelector
           selectedDuration={selectedDuration}
@@ -133,9 +138,9 @@ export const TaskForm = ({
       )}
       {timerOption === 'startTimer' && (
         <div>
-          <button onClick={handleStartStop} disabled={!selectedProject}>
+          <Button onClick={handleStartStop} disabled={!selectedProject}>
             {isRunning ? 'Stop Timer' : 'Start Timer'}
-          </button>
+          </Button>
           <div>
             Elapsed Time: {Math.floor(elapsedTime / 60)} min {elapsedTime % 60}{' '}
             sec

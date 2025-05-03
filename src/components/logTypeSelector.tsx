@@ -1,3 +1,11 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+
 type LogType = 'meeting' | 'task';
 
 interface LogTypeSelectorProps {
@@ -10,13 +18,17 @@ export const LogTypeSelector = ({
   setLogType,
 }: LogTypeSelectorProps) => {
   return (
-    <select
+    <Select
       value={logType}
-      onChange={(e) => setLogType(e.target.value as 'meeting' | 'task')}
-      className='select-type'
+      onValueChange={(value) => setLogType(value as LogType)}
     >
-      <option value='task'>Task</option>
-      <option value='meeting'>Meeting</option>
-    </select>
+      <SelectTrigger className='select-type'>
+        <SelectValue placeholder='Select log type' />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value='task'>Task</SelectItem>
+        <SelectItem value='meeting'>Meeting</SelectItem>
+      </SelectContent>
+    </Select>
   );
 };
