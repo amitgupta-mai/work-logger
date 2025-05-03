@@ -20,7 +20,7 @@ export const DurationSelector = ({
 }) => {
   return (
     <Select
-      key={selectedDuration?.value}
+      key={selectedDuration?.value ?? 'duration'}
       value={selectedDuration ? selectedDuration.value.toString() : undefined}
       onValueChange={(value) =>
         setSelectedDuration(

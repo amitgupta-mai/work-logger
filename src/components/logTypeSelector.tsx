@@ -19,10 +19,11 @@ export const LogTypeSelector = ({
 }: LogTypeSelectorProps) => {
   return (
     <Select
+      key={logType || 'log-type'}
       value={logType}
       onValueChange={(value) => setLogType(value as LogType)}
     >
-      <SelectTrigger className='select-type'>
+      <SelectTrigger>
         <SelectValue placeholder='Select log type' />
       </SelectTrigger>
       <SelectContent>
