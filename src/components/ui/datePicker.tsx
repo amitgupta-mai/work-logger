@@ -12,9 +12,11 @@ import {
 } from '@/components/ui/popover';
 
 export function DatePicker({
+  className,
   selectedDate,
   setSelectedDate,
 }: {
+  className?: string;
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
 }) {
@@ -33,7 +35,8 @@ export function DatePicker({
           variant={'outline'}
           className={cn(
             'w-[280px] justify-start text-left font-normal',
-            !selectedDate && 'text-muted-foreground'
+            !selectedDate && 'text-muted-foreground',
+            className
           )}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         >

@@ -112,12 +112,15 @@ const Logger = () => {
       >
         ➕ Add Entry
       </Button>
-      <div className='entries-container'>
-        <h3>Logs for {selectedDate?.toLocaleDateString()}</h3>
-        <DatePicker
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-        />
+      <div className='mt-4'>
+        <div className='flex flex-row gap-2 items-center'>
+          <h3>Logs for </h3>
+          <DatePicker
+            className='w-2/3'
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+          />
+        </div>
         {todayEntries.length > 0 && (
           <EntriesList
             entries={todayEntries}
