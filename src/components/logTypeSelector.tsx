@@ -13,16 +13,9 @@ interface LogTypeSelectorProps {
   setLogType: (type: LogType) => void;
 }
 
-export const LogTypeSelector = ({
-  logType,
-  setLogType,
-}: LogTypeSelectorProps) => {
+export const LogTypeSelector = ({ setLogType }: LogTypeSelectorProps) => {
   return (
-    <Select
-      key={logType || 'log-type'}
-      value={logType}
-      onValueChange={(value) => setLogType(value as LogType)}
-    >
+    <Select onValueChange={(value) => setLogType(value as LogType)}>
       <SelectTrigger>
         <SelectValue placeholder='Select log type' />
       </SelectTrigger>

@@ -3,7 +3,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { LogTypeSelector } from '../logTypeSelector';
 import { MeetingForm } from '../meetingForm';
 import { TaskForm } from '../taskForm';
-import TotalTimeDisplay from '../totalTimeDisplay';
 
 import { EntryType } from '../../types';
 import { OptionType } from '../../types';
@@ -15,6 +14,7 @@ import { Button } from '../ui/button';
 import { DatePicker } from '../ui/datePicker';
 import { CopyIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import TotalTimeDisplay from '../totalTimeDisplay';
 
 const Logger = () => {
   const [logType, setLogType] = useState<'meeting' | 'task'>('task');
@@ -83,35 +83,36 @@ const Logger = () => {
 
   return (
     <div>
-      <TotalTimeDisplay todayEntries={todayEntries} />
-
-      <LogTypeSelector logType={logType} setLogType={setLogType} />
-      {logType === 'meeting' && (
-        <MeetingForm
-          selectedPerson={selectedPerson}
-          setSelectedPerson={setSelectedPerson}
-          selectedProject={selectedProject}
-          setSelectedProject={setSelectedProject}
-          selectedDuration={selectedDuration}
-          setSelectedDuration={setSelectedDuration}
-        />
-      )}
-      {logType === 'task' && (
-        <TaskForm
-          selectedProject={selectedProject}
-          setSelectedProject={setSelectedProject}
-          selectedDuration={selectedDuration}
-          setSelectedDuration={setSelectedDuration}
-          taskRecorded={taskRecorded}
-        />
-      )}
-      <Button
-        onClick={handleAddEntry}
-        disabled={isAddEntryDisabled}
-        variant='default'
-      >
-        ➕ Add Entry
-      </Button>
+      <div className='flex flex-col gap-2'>
+        <TotalTimeDisplay todayEntries={todayEntries} />
+        <LogTypeSelector logType={logType} setLogType={setLogType} />
+        {logType === 'meeting' && (
+          <MeetingForm
+            selectedPerson={selectedPerson}
+            setSelectedPerson={setSelectedPerson}
+            selectedProject={selectedProject}
+            setSelectedProject={setSelectedProject}
+            selectedDuration={selectedDuration}
+            setSelectedDuration={setSelectedDuration}
+          />
+        )}
+        {logType === 'task' && (
+          <TaskForm
+            selectedProject={selectedProject}
+            setSelectedProject={setSelectedProject}
+            selectedDuration={selectedDuration}
+            setSelectedDuration={setSelectedDuration}
+            taskRecorded={taskRecorded}
+          />
+        )}
+        <Button
+          onClick={handleAddEntry}
+          disabled={isAddEntryDisabled}
+          variant='default'
+        >
+          ➕ Add Entry
+        </Button>
+      </div>
       <div className='mt-4'>
         <div className='flex flex-row gap-2 items-center'>
           <h3>Logs for </h3>

@@ -20,7 +20,7 @@ const buttonVariants = cva(
         ghost:
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
-        floating: 'fixed bottom-4 right-4 z-50 rounded-full p-4 shadow-lg', // 👈 new variant
+        floating: 'fixed bottom-4 right-4 z-50 rounded-full p-4 shadow-lg',
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
