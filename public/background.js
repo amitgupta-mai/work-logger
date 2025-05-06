@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'startTimer') {
     chrome.storage.local.get('isRunning', (result) => {
       if (!result.isRunning) {
-        chrome.alarms.create('timerAlarm', { periodInMinutes: 1 / 60 }); // Trigger every second
+        chrome.alarms.create('timerAlarm', { periodInMinutes: 1 / 60 });
         chrome.storage.local.set({ isRunning: true });
       }
     });

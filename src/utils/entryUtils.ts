@@ -1,7 +1,4 @@
-import { confirmAlert } from 'react-confirm-alert';
 import { EntryType } from '../types';
-import { toast } from 'react-toastify';
-import 'react-confirm-alert/src/react-confirm-alert.css';
 
 export const addEntry = (
   entryText: string,
@@ -26,33 +23,15 @@ export const handleDeleteEntry = (
   entryId: string,
   todayEntries: EntryType[],
   setTodayEntries: React.Dispatch<React.SetStateAction<EntryType[]>>,
-  selectedDate: Date | null
+  selectedDate: Date | undefined
 ) => {
-  confirmAlert({
-    title: 'Confirm to delete',
-    message: 'Are you sure you want to delete this entry?',
-    buttons: [
-      {
-        label: 'Yes',
-        onClick: () => {
-          setTodayEntries(todayEntries.filter((entry) => entry.id !== entryId));
-          chrome.storage.local.get(['allEntries'], (result) => {
-            const allEntries = result.allEntries || {};
-            const today = (selectedDate ?? new Date())
-              .toISOString()
-              .split('T')[0];
-            allEntries[today] = allEntries[today].filter(
-              (entry: EntryType) => entry.id !== entryId
-            );
-            chrome.storage.local.set({ allEntries });
-          });
-          toast.success('Entry deleted successfully!');
-        },
-      },
-      {
-        label: 'No',
-        onClick: () => {},
-      },
-    ],
+  setTodayEntries(todayEntries.filter((entry) => entry.id !== entryId));
+  chrome.storage.local.get(['allEntries'], (result) => {
+    const allEntries = result.allEntries || {};
+    const today = (selectedDate ?? new Date()).toISOString().split('T')[0];
+    allEntries[today] = allEntries[today].filter(
+      (entry: EntryType) => entry.id !== entryId
+    );
+    chrome.storage.local.set({ allEntries });
   });
 };

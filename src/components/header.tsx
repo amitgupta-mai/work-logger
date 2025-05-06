@@ -1,16 +1,7 @@
-import { ThemeToggle } from '../ui/themeToggle';
-
-export const Header = ({
-  theme,
-  toggleTheme,
-}: {
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
-}) => {
+export const Header = () => {
   return (
     <div className='header'>
-      <h2>TimeZen</h2>
-      <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+      <h2 className='text-primary text-2xl font-bold m-0 py-2'>TimeZen</h2>
     </div>
   );
 };

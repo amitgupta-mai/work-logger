@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import Entry from './entry';
+import { isToday } from '@/utils/dateTimeUtils';
 
 interface Entry {
   id: string;
@@ -18,14 +19,11 @@ export const EntriesList = ({
   selectedDate,
 }: EntriesListProps) => {
   const isDeletable = useMemo(() => {
-    return (
-      selectedDate?.toISOString().split('T')[0] ===
-      new Date().toISOString().split('T')[0]
-    );
+    return isToday(selectedDate);
   }, [selectedDate]);
 
   return (
-    <ul className='entries-list'>
+    <ul className='mt-3 h-[140px] overflow-hidden hover:overflow-y-auto'>
       {entries.map((entry) => (
         <Entry
           key={entry.id}

@@ -10,8 +10,8 @@ export type DurationType = {
   label: string;
 };
 
-// LogType for handling log type selection (meeting or task)
-export type LogType = 'meeting' | 'task';
+// LogType for handling log type selection (Meeting or Task)
+export type LogType = 'Meeting' | 'Task';
 
 // EntryType for handling entries
 export type EntryType = {

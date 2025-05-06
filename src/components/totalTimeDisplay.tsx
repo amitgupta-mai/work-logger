@@ -20,7 +20,7 @@ const TotalTimeDisplay: React.FC<TotalTimeDisplayProps> = ({
   }, [todayEntries]);
 
   return (
-    <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px' }}>
+    <div className='text-sm text-muted-foreground'>
       Total Time: {computedDuration}
     </div>
   );
