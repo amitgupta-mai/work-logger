@@ -46,34 +46,42 @@ export const TaskForm = ({
   }, [setSelectedProject, selectedProject]);
 
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
     getChromeStorageData(
       ['elapsedTime', 'isRunning', 'activeProject'],
       (result) => {
-        if (result.isRunning) {
+        const isTimerRunning =
+          typeof result.isRunning === 'boolean' && result.isRunning;
+        const elapsed =
+          typeof result.elapsedTime === 'number' ? result.elapsedTime : 0;
+
+        setIsRunning(isTimerRunning);
+        setElapsedTime(elapsed);
+
+        if (isTimerRunning) {
+          setSelectedProject(result?.activeProject as OptionType);
           setTimerOption('startTimer');
-          setSelectedProject(result.activeProject as OptionType);
-          if (!isNaN(Number(result.elapsedTime))) {
-            intervalId = setInterval(() => {
-              getChromeStorageData(['elapsedTime', 'isRunning'], (result) => {
-                setElapsedTime((prevElapsedTime) =>
-                  typeof result.elapsedTime === 'number'
-                    ? result.elapsedTime
-                    : prevElapsedTime
-                );
-                setIsRunning(
-                  typeof result.isRunning === 'boolean'
-                    ? result.isRunning
-                    : false
-                );
-              });
-            }, 1000);
-          }
+          intervalId = setInterval(() => {
+            getChromeStorageData(
+              ['elapsedTime', 'isRunning'],
+              (intervalResult) => {
+                if (typeof intervalResult.elapsedTime === 'number') {
+                  setElapsedTime(intervalResult.elapsedTime);
+                }
+                if (typeof intervalResult.isRunning === 'boolean') {
+                  setIsRunning(intervalResult.isRunning);
+                }
+              }
+            );
+          }, 1000);
         }
       }
     );
 
-    return () => clearInterval(intervalId);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [isRunning]);
 
   useEffect(() => {
@@ -82,7 +90,7 @@ export const TaskForm = ({
       setSelectedDuration(null);
       setChromeStorageData({ elapsedTime: 0 });
     }
-  }, [taskRecorded, setSelectedDuration]);
+  }, [taskRecorded]);
 
   const handleCreateProject = (inputValue: string) => {
     const newProject = { label: inputValue, value: inputValue };
@@ -137,13 +145,12 @@ export const TaskForm = ({
         />
       )}
       {timerOption === 'startTimer' && (
-        <div>
+        <div className='flex items-center space-x-4'>
           <Button onClick={handleStartStop} disabled={!selectedProject}>
             {isRunning ? 'Stop Timer' : 'Start Timer'}
           </Button>
           <div>
-            Elapsed Time: {Math.floor(elapsedTime / 60)} min {elapsedTime % 60}{' '}
-            sec
+            {Math.floor(elapsedTime / 60)} min {elapsedTime % 60} sec
           </div>
         </div>
       )}

@@ -19,10 +19,10 @@ const App = () => {
           <Logger />
         </TabsContent>
         <TabsContent value='pomodoro'>
-          <div>Pomodoro Timer</div>
+          <div>Pomodoro Timer. Coming soon.</div>
         </TabsContent>
         <TabsContent value='break'>
-          <div>Break Reminder</div>
+          <div>Break Reminder. Coming soon.</div>
         </TabsContent>
       </Tabs>
     </div>

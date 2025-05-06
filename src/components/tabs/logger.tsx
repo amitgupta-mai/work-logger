@@ -14,10 +14,11 @@ import { Button } from '../ui/button';
 import { DatePicker } from '../ui/datePicker';
 import { CopyIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { isToday } from '../../utils/dateTimeUtils';
 import TotalTimeDisplay from '../totalTimeDisplay';
 
 const Logger = () => {
-  const [logType, setLogType] = useState<'meeting' | 'task'>('task');
+  const [logType, setLogType] = useState<'Meeting' | 'Task'>('Task');
   const [selectedProject, setSelectedProject] = useState<OptionType | null>(
     null
   );
@@ -28,7 +29,16 @@ const Logger = () => {
   const [todayEntries, setTodayEntries] = useState<EntryType[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<OptionType | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [taskRecorded, setTaskRecorded] = useState(false);
+  const [taskRecorded, setTaskRecorded] = useState<boolean>(false);
+
+  // hack to record task after if has been done once
+  useEffect(() => {
+    if (taskRecorded) {
+      setTimeout(() => {
+        setTaskRecorded(false);
+      }, 2000);
+    }
+  }, [taskRecorded]);
 
   useEffect(() => {
     loadTheme();
@@ -45,13 +55,13 @@ const Logger = () => {
   }, [selectedDate]);
 
   const handleAddEntry = () => {
-    if (!selectedProject || !selectedDuration) {
+    if (!selectedProject || !selectedDuration || !isToday(selectedDate)) {
       return;
     }
 
     let entryText = `Project: ${selectedProject.label} - ${selectedDuration.label}`;
 
-    if (logType === 'meeting' && selectedPerson) {
+    if (logType === 'Meeting' && selectedPerson) {
       entryText = `Meeting: ${selectedPerson.label} - ${selectedDuration.label} (Project: ${selectedProject.label})`;
     }
 
@@ -71,7 +81,7 @@ const Logger = () => {
   };
 
   const isAddEntryDisabled = useMemo(() => {
-    if (logType === 'meeting') {
+    if (logType === 'Meeting') {
       return !selectedPerson || !selectedProject || !selectedDuration;
     }
     return !selectedProject || !selectedDuration;
@@ -83,10 +93,12 @@ const Logger = () => {
 
   return (
     <div>
-      <div className='flex flex-col gap-2'>
-        <TotalTimeDisplay todayEntries={todayEntries} />
-        <LogTypeSelector logType={logType} setLogType={setLogType} />
-        {logType === 'meeting' && (
+      <div className='flex flex-col gap-4 mt-2'>
+        <div className='flex flex-row justify-between items-center'>
+          <LogTypeSelector logType={logType} setLogType={setLogType} />
+          <TotalTimeDisplay todayEntries={todayEntries} />
+        </div>
+        {logType === 'Meeting' && (
           <MeetingForm
             selectedPerson={selectedPerson}
             setSelectedPerson={setSelectedPerson}
@@ -96,7 +108,7 @@ const Logger = () => {
             setSelectedDuration={setSelectedDuration}
           />
         )}
-        {logType === 'task' && (
+        {logType === 'Task' && (
           <TaskForm
             selectedProject={selectedProject}
             setSelectedProject={setSelectedProject}
@@ -115,7 +127,7 @@ const Logger = () => {
       </div>
       <div className='mt-4'>
         <div className='flex flex-row gap-2 items-center'>
-          <h3>Logs for </h3>
+          <h3 className='text-lg font-semibold'>Logs for: </h3>
           <DatePicker
             className='w-2/3'
             selectedDate={selectedDate}
@@ -133,9 +145,13 @@ const Logger = () => {
       <Button
         onClick={copyEntries}
         variant='floating'
-        className='bg-primary text-white'
+        className='group bg-primary text-white pl-4 pr-4 hover:pr-6 transition-all duration-300 flex items-center overflow-hidden'
       >
-        <CopyIcon className='w-4 h-4' />
+        <span className='whitespace-nowrap hidden max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 group-hover:mr-1 group-hover:flex transition-all duration-300 ease-in-out'>
+          Copy
+        </span>
+
+        <CopyIcon className='w-4 h-4 shrink-0' />
       </Button>
     </div>
   );

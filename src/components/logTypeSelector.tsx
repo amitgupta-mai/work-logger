@@ -6,22 +6,25 @@ import {
   SelectValue,
 } from './ui/select';
 
-type LogType = 'meeting' | 'task';
+type LogType = 'Meeting' | 'Task';
 
 interface LogTypeSelectorProps {
   logType: LogType;
   setLogType: (type: LogType) => void;
 }
 
-export const LogTypeSelector = ({ setLogType }: LogTypeSelectorProps) => {
+export const LogTypeSelector = ({
+  setLogType,
+  logType,
+}: LogTypeSelectorProps) => {
   return (
     <Select onValueChange={(value) => setLogType(value as LogType)}>
       <SelectTrigger>
-        <SelectValue placeholder='Select log type' />
+        <SelectValue placeholder={logType} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value='task'>Task</SelectItem>
-        <SelectItem value='meeting'>Meeting</SelectItem>
+        <SelectItem value='Task'>Task</SelectItem>
+        <SelectItem value='Meeting'>Meeting</SelectItem>
       </SelectContent>
     </Select>
   );

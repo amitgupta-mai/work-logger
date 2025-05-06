@@ -62,6 +62,7 @@ export const MeetingForm = ({
     <>
       <CreatableSelect
         placeholder={`Select or type person's name`}
+        classNamePrefix='rs'
         value={selectedPerson}
         onChange={(e) => setSelectedPerson(e)}
         onCreateOption={handleCreatePerson}
@@ -71,6 +72,7 @@ export const MeetingForm = ({
       />
       <CreatableSelect
         placeholder='Select or type project name'
+        classNamePrefix='rs'
         value={selectedProject}
         onChange={(e) => setSelectedProject(e)}
         onCreateOption={handleCreateProject}
