@@ -10,25 +10,43 @@ import { Toaster } from './components/ui/sonner';
 
 const App = () => {
   return (
-    <div className='container grid grid-rows-[auto_1fr] h-screen overflow-hidden'>
+    <div className='container grid grid-rows-[auto_1fr] h-screen'>
       <Header />
-      <Tabs defaultValue='logger' className='grid grid-rows-[auto_1fr]'>
+      <Tabs defaultValue='logger' className='grid grid-rows-[auto_1fr] min-h-0'>
         <TabsList>
           <TabsTrigger value='logger'>Logger</TabsTrigger>
           <TabsTrigger value='pomodoro'>Pomodoro</TabsTrigger>
           <TabsTrigger value='break'>Break Reminder</TabsTrigger>
         </TabsList>
-        <TabsContent value='logger' className='min-h-0'>
+        <TabsContent value='logger' className='min-h-0 overflow-hidden'>
           <Logger />
         </TabsContent>
-        <TabsContent value='pomodoro' className='min-h-0'>
+        <TabsContent
+          value='pomodoro'
+          className='min-h-0 overflow-auto hide-scrollbar-on-idle'
+        >
           <Pomodoro />
         </TabsContent>
-        <TabsContent value='break' className='min-h-0'>
+        <TabsContent
+          value='break'
+          className='min-h-0 overflow-auto hide-scrollbar-on-idle'
+        >
           <BreakReminder />
         </TabsContent>
       </Tabs>
-      <Toaster position='top-right' richColors />
+      <Toaster
+        position='top-right'
+        richColors
+        closeButton
+        duration={4000}
+        expand={true}
+        toastOptions={{
+          style: {
+            marginBottom: '12px',
+            borderRadius: '8px',
+          },
+        }}
+      />
     </div>
   );
 };

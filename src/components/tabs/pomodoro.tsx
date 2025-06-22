@@ -209,7 +209,7 @@ const Popup = () => {
             setRemaining(settings.workDuration * 60);
             setIsRunning(false);
             setIsBreak(false);
-            toast.info('Timer stopped');
+            toast.info('Pomodoro stopped');
           }
           setIsLoading(false);
         }

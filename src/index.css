@@ -6,7 +6,7 @@
 html,
 body {
   height: 600px;
-  overflow: auto;
+  overflow: hidden;
 }
 
 :root {
@@ -160,4 +160,46 @@ body {
 
 .hide-scrollbar-on-idle:hover::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
+}
+
+/* Custom styles for Sonner toast close button */
+.custom-toast [data-sonner-toast-close] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+}
+
+/* Alternative selectors for Sonner close button */
+[data-sonner-toast] [data-sonner-toast-close] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+}
+
+/* Target the button element directly */
+[data-sonner-toast] button[data-sonner-toast-close] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+}
+
+/* More aggressive targeting */
+[data-sonner-toast-close] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+/* Target any close button in Sonner toasts */
+.sonner-toast [data-sonner-toast-close],
+.sonner-toast button[data-sonner-toast-close] {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
 }
