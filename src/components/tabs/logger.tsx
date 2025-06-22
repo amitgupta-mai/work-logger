@@ -39,6 +39,7 @@ const Logger = () => {
   const [taskRecorded, setTaskRecorded] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
 
   // hack to record task after if has been done once
   useEffect(() => {
@@ -48,6 +49,21 @@ const Logger = () => {
       }, 2000);
     }
   }, [taskRecorded]);
+
+  // Check if timer is running
+  useEffect(() => {
+    const checkTimerStatus = () => {
+      getStorageDataAsync(['isRunning']).then((response) => {
+        if (response.success && response.data) {
+          setIsTimerRunning(response.data.isRunning || false);
+        }
+      });
+    };
+
+    checkTimerStatus();
+    const interval = setInterval(checkTimerStatus, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadEntries = useCallback(async () => {
     setIsLoading(true);
@@ -215,7 +231,11 @@ const Logger = () => {
       <div className='flex-shrink-0 rounded-xl border bg-card text-card-foreground shadow-sm'>
         <div className='p-2 space-y-1.5'>
           <div className='flex justify-between items-center'>
-            <LogTypeSelector logType={logType} setLogType={setLogType} />
+            <LogTypeSelector
+              logType={logType}
+              setLogType={setLogType}
+              disabled={isTimerRunning}
+            />
             <TotalTimeDisplay todayEntries={todayEntries} />
           </div>
           {logType === 'Task' ? (
@@ -225,6 +245,7 @@ const Logger = () => {
               selectedDuration={selectedDuration}
               setSelectedDuration={setSelectedDuration}
               taskRecorded={taskRecorded}
+              isTimerRunning={isTimerRunning}
             />
           ) : (
             <MeetingForm
@@ -234,6 +255,7 @@ const Logger = () => {
               setSelectedProject={setSelectedProject}
               selectedDuration={selectedDuration}
               setSelectedDuration={setSelectedDuration}
+              isTimerRunning={isTimerRunning}
             />
           )}
           {validationErrors.length > 0 && (

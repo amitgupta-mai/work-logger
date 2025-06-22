@@ -19,6 +19,7 @@ interface MeetingFormProps {
   setSelectedProject: (project: OptionType | null) => void;
   selectedDuration: Duration | null;
   setSelectedDuration: (duration: Duration | null) => void;
+  isTimerRunning?: boolean;
 }
 
 export const MeetingForm = ({
@@ -28,6 +29,7 @@ export const MeetingForm = ({
   setSelectedProject,
   selectedDuration,
   setSelectedDuration,
+  isTimerRunning = false,
 }: MeetingFormProps) => {
   const [people, setPeople] = useState<OptionType[]>([]);
   const [projects, setProjects] = useState<OptionType[]>([]);
@@ -77,6 +79,7 @@ export const MeetingForm = ({
         options={projects}
         isClearable
         isSearchable
+        isDisabled={isTimerRunning}
       />
       <DurationSelector
         selectedDuration={selectedDuration}

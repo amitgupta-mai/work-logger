@@ -23,6 +23,7 @@ interface TaskFormProps {
   selectedDuration: DurationOption | null;
   setSelectedDuration: (value: DurationOption | null) => void;
   taskRecorded: boolean;
+  isTimerRunning?: boolean;
 }
 
 export const TaskForm = ({
@@ -31,6 +32,7 @@ export const TaskForm = ({
   selectedDuration,
   setSelectedDuration,
   taskRecorded,
+  isTimerRunning = false,
 }: TaskFormProps) => {
   const [projects, setProjects] = useState<OptionType[]>([]);
   const [timerOption, setTimerOption] = useState<TimerOption>('selectDuration');
@@ -122,6 +124,7 @@ export const TaskForm = ({
         options={projects}
         isClearable
         isSearchable
+        isDisabled={isTimerRunning}
       />
       <RadioGroup
         value={timerOption}

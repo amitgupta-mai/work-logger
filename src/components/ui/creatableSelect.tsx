@@ -6,19 +6,24 @@ export const StyledCreatableSelect = (
   props: CreatableProps<OptionType, false, GroupBase<OptionType>>
 ) => {
   const customStyles: StylesConfig<OptionType, false, GroupBase<OptionType>> = {
-    control: (provided, state) => ({
-      ...provided,
-      backgroundColor: 'color-mix(in oklab, var(--input) 30%, transparent)',
-      borderColor: 'var(--input)',
-      boxShadow: state.isFocused ? `0 0 0 1px var(--ring)` : 'none',
-      '&:hover': {
-        borderColor: 'var(--input)',
-      },
-      borderRadius: 'var(--radius-md)',
-      height: '2.25rem',
-      minHeight: '2.25rem',
-      cursor: 'pointer',
-    }),
+    control: (provided, state) => {
+      const isDisabled = props.isDisabled;
+      return {
+        ...provided,
+        backgroundColor: isDisabled
+          ? 'color-mix(in oklab, var(--muted) 30%, transparent)'
+          : 'color-mix(in oklab, var(--input) 30%, transparent)',
+        borderColor: isDisabled ? 'var(--border)' : 'var(--input)',
+        boxShadow: state.isFocused ? `0 0 0 1px var(--ring)` : 'none',
+        '&:hover': {
+          borderColor: isDisabled ? 'var(--border)' : 'var(--input)',
+        },
+        borderRadius: 'var(--radius-md)',
+        height: '2.25rem',
+        minHeight: '2.25rem',
+        opacity: isDisabled ? 0.6 : 1,
+      };
+    },
     menu: (provided) => ({
       ...provided,
       backgroundColor: 'var(--popover)',
@@ -38,13 +43,13 @@ export const StyledCreatableSelect = (
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: 'var(--foreground)',
+      color: props.isDisabled ? 'var(--muted-foreground)' : 'var(--foreground)',
       fontSize: '0.8125rem',
       fontWeight: 500,
     }),
     input: (provided) => ({
       ...provided,
-      color: 'var(--foreground)',
+      color: props.isDisabled ? 'var(--muted-foreground)' : 'var(--foreground)',
       margin: '0px',
       padding: '0px',
       fontSize: '0.8125rem',
@@ -52,13 +57,16 @@ export const StyledCreatableSelect = (
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: 'var(--muted-foreground)',
+      color: props.isDisabled
+        ? 'var(--muted-foreground)'
+        : 'var(--muted-foreground)',
       fontSize: '0.8125rem',
       fontWeight: 500,
     }),
     clearIndicator: (provided) => ({
       ...provided,
       color: 'var(--muted-foreground)',
+      cursor: 'pointer',
       '&:hover': {
         color: 'var(--foreground)',
       },
@@ -66,6 +74,7 @@ export const StyledCreatableSelect = (
     dropdownIndicator: (provided) => ({
       ...provided,
       color: 'var(--muted-foreground)',
+      cursor: 'pointer',
       '&:hover': {
         color: 'var(--foreground)',
       },
@@ -76,5 +85,9 @@ export const StyledCreatableSelect = (
     }),
   };
 
-  return <CreatableSelect {...props} styles={customStyles} />;
+  return (
+    <div className={props.isDisabled ? 'disabled-select' : ''}>
+      <CreatableSelect {...props} styles={customStyles} />
+    </div>
+  );
 };

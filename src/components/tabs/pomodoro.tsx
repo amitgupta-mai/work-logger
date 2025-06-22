@@ -64,6 +64,14 @@ const Popup = () => {
     loadSettings();
   }, [loadSettings]);
 
+  // Ensure popup has focus when it loads to fix first-click issue
+  useEffect(() => {
+    // Focus the popup window to ensure clicks register properly
+    if (window.focus) {
+      window.focus();
+    }
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -113,9 +121,11 @@ const Popup = () => {
   }, [settings, isInitializing]);
 
   const startPomodoro = async () => {
+    console.log('startPomodoro called');
     setIsLoading(true);
     try {
       const duration = settings.workDuration;
+      console.log('Sending startPomodoro message with duration:', duration);
       chrome.runtime.sendMessage(
         {
           action: 'startPomodoro',
@@ -124,6 +134,7 @@ const Popup = () => {
           completedPomodoros,
         },
         (response) => {
+          console.log('startPomodoro response:', response);
           if (chrome.runtime.lastError || !response?.success) {
             console.error(
               'Error starting pomodoro:',
@@ -147,12 +158,19 @@ const Popup = () => {
   };
 
   const startBreak = async () => {
+    console.log('startBreak called');
     setIsLoading(true);
     try {
       const isLongBreak = completedPomodoros % settings.longBreakInterval === 0;
       const duration = isLongBreak
         ? settings.longBreakDuration
         : settings.breakDuration;
+      console.log(
+        'Sending startBreak message with duration:',
+        duration,
+        'isLongBreak:',
+        isLongBreak
+      );
       chrome.runtime.sendMessage(
         {
           action: 'startPomodoro',
@@ -162,6 +180,7 @@ const Popup = () => {
           completedPomodoros,
         },
         (response) => {
+          console.log('startBreak response:', response);
           if (chrome.runtime.lastError || !response?.success) {
             console.error(
               'Error starting break:',
@@ -237,6 +256,20 @@ const Popup = () => {
     saveSettings(newSettings);
   };
 
+  // Wrapper function to ensure popup is focused before handling clicks
+  const handleButtonClick = (action: () => void) => {
+    return () => {
+      // Ensure popup has focus
+      if (window.focus) {
+        window.focus();
+      }
+      // Small delay to ensure focus is established
+      setTimeout(() => {
+        action();
+      }, 10);
+    };
+  };
+
   return (
     <div className='h-full flex flex-col gap-2'>
       <div className='overflow-y-scroll hide-scrollbar-on-idle pb-4'>
@@ -291,7 +324,7 @@ const Popup = () => {
                   {isRunning ? (
                     <Button
                       variant='destructive'
-                      onClick={stopPomodoro}
+                      onClick={handleButtonClick(stopPomodoro)}
                       disabled={isLoading}
                       className='flex items-center gap-2'
                     >
@@ -301,7 +334,7 @@ const Popup = () => {
                   ) : (
                     <>
                       <Button
-                        onClick={startPomodoro}
+                        onClick={handleButtonClick(startPomodoro)}
                         disabled={isLoading}
                         className='flex items-center gap-2'
                       >
@@ -310,7 +343,7 @@ const Popup = () => {
                       </Button>
                       <Button
                         variant='outline'
-                        onClick={startBreak}
+                        onClick={handleButtonClick(startBreak)}
                         disabled={isLoading}
                       >
                         Start Break
@@ -324,7 +357,7 @@ const Popup = () => {
                     <Button
                       variant='ghost'
                       size='sm'
-                      onClick={resetPomodoro}
+                      onClick={handleButtonClick(resetPomodoro)}
                       className='flex items-center gap-2'
                     >
                       <RotateCcwIcon className='w-4 h-4' />
