@@ -195,78 +195,82 @@ const BreakReminder = () => {
   };
 
   return (
-    <div className='w-[350px] flex flex-col mx-auto'>
-      <Card className='w-full'>
-        <CardHeader className='p-4 pb-2'>
-          <div className='flex items-center justify-between'>
-            <CardTitle className='text-lg'>Break Reminder</CardTitle>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              <SettingsIcon className='w-4 h-4' />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className='flex flex-col items-center gap-3 p-4 pt-0'>
-          <div className='flex items-center gap-2'>
-            <BellIcon
-              className={`w-6 h-6 ${
-                settings.enabled ? 'text-green-500' : 'text-gray-400'
-              }`}
-            />
-            <span className='text-sm font-medium'>
-              {settings.enabled ? 'Active' : 'Inactive'}
-            </span>
-          </div>
-
-          {settings.enabled && (
-            <>
-              <div className='text-center'>
-                <div className='text-2xl font-mono font-bold'>
-                  {formatTimeUntilBreak(timeUntilBreak)}
-                </div>
-                <div className='text-sm text-muted-foreground'>
-                  until next break
-                </div>
-              </div>
-
-              <div className='flex gap-2'>
-                <Button
-                  onClick={takeBreakNow}
-                  variant='outline'
-                  size='sm'
-                  className='flex items-center gap-2'
-                >
-                  <CoffeeIcon className='w-4 h-4' />
-                  Take Break Now
-                </Button>
-              </div>
-            </>
-          )}
-
-          <div className='flex items-center justify-between w-full'>
-            <Label htmlFor='breakToggle'>Enable Break Reminders</Label>
-            <Switch
-              id='breakToggle'
-              checked={settings.enabled}
-              onCheckedChange={toggleBreakReminder}
-            />
-          </div>
-
-          {settings.enabled && (
-            <div className='text-xs text-muted-foreground text-center'>
-              Reminders every {settings.interval} minutes
+    <div className='h-full flex flex-col gap-2'>
+      <div className='overflow-y-scroll hide-scrollbar-on-idle pb-4'>
+        <Card className='w-full'>
+          <CardHeader className='p-4 pb-2'>
+            <div className='flex items-center justify-between'>
+              <CardTitle className='text-lg'>Break Reminder</CardTitle>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <SettingsIcon className='w-4 h-4' />
+              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className='flex flex-col items-center gap-3 p-4 pt-0'>
+            <div className='flex items-center gap-2'>
+              <BellIcon
+                className={`w-6 h-6 ${
+                  settings.enabled ? 'text-green-500' : 'text-gray-400'
+                }`}
+              />
+              <span className='text-sm font-medium'>
+                {settings.enabled ? 'Active' : 'Inactive'}
+              </span>
+            </div>
 
-      {showSettings && (
-        <div className='mt-4'>
-          <Card className='w-full'>
-            <CardHeader>
+            {settings.enabled && (
+              <>
+                <div className='text-center'>
+                  <div className='text-2xl font-mono font-bold'>
+                    {formatTimeUntilBreak(timeUntilBreak)}
+                  </div>
+                  <div className='text-sm text-muted-foreground'>
+                    until next break
+                  </div>
+                </div>
+
+                <div className='flex gap-2'>
+                  <Button
+                    onClick={takeBreakNow}
+                    variant='outline'
+                    size='sm'
+                    className='flex items-center gap-2'
+                  >
+                    <CoffeeIcon className='w-4 h-4' />
+                    Take Break Now
+                  </Button>
+                </div>
+              </>
+            )}
+
+            <div className='w-full rounded-lg border bg-card p-3'>
+              <div className='flex items-center justify-between w-full'>
+                <Label htmlFor='breakToggle' className='flex items-center'>
+                  Enable Break Reminders
+                </Label>
+                <Switch
+                  id='breakToggle'
+                  checked={settings.enabled}
+                  onCheckedChange={toggleBreakReminder}
+                />
+              </div>
+
+              {settings.enabled && (
+                <div className='text-xs text-muted-foreground mt-2'>
+                  Reminders every {settings.interval} minutes
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {showSettings && (
+          <Card className='w-full mt-4 flex-shrink-0'>
+            <CardHeader className='p-4 pb-2'>
               <CardTitle className='text-sm'>Settings</CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
@@ -341,8 +345,8 @@ const BreakReminder = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

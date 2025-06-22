@@ -21,16 +21,10 @@ const App = () => {
         <TabsContent value='logger' className='min-h-0 overflow-hidden'>
           <Logger />
         </TabsContent>
-        <TabsContent
-          value='pomodoro'
-          className='min-h-0 overflow-auto hide-scrollbar-on-idle'
-        >
+        <TabsContent value='pomodoro' className='min-h-0 overflow-hidden'>
           <Pomodoro />
         </TabsContent>
-        <TabsContent
-          value='break'
-          className='min-h-0 overflow-auto hide-scrollbar-on-idle'
-        >
+        <TabsContent value='break' className='min-h-0 overflow-hidden'>
           <BreakReminder />
         </TabsContent>
       </Tabs>

@@ -92,10 +92,7 @@ const Popup = () => {
           setCompletedPomodoros(completed);
 
           if (isInitializing) {
-            // Add a small delay to make the loading state visible
-            setTimeout(() => {
-              setIsInitializing(false);
-            }, 500);
+            setIsInitializing(false);
           }
 
           // Auto-start break or work if enabled
@@ -113,7 +110,7 @@ const Popup = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [settings]);
+  }, [settings, isInitializing]);
 
   const startPomodoro = async () => {
     setIsLoading(true);
@@ -124,6 +121,7 @@ const Popup = () => {
           action: 'startPomodoro',
           duration,
           isBreak: false,
+          completedPomodoros,
         },
         (response) => {
           if (chrome.runtime.lastError || !response?.success) {
@@ -174,9 +172,7 @@ const Popup = () => {
             setIsRunning(true);
             setIsBreak(true);
             setRemaining(duration * 60);
-            toast.success(
-              isLongBreak ? 'Long break started!' : 'Break started!'
-            );
+            toast.success('Break started');
           }
           setIsLoading(false);
         }
@@ -209,7 +205,7 @@ const Popup = () => {
             setRemaining(settings.workDuration * 60);
             setIsRunning(false);
             setIsBreak(false);
-            toast.info('Pomodoro stopped');
+            toast.info(isBreak ? 'Break stopped' : 'Pomodoro stopped');
           }
           setIsLoading(false);
         }
@@ -242,175 +238,224 @@ const Popup = () => {
   };
 
   return (
-    <div className='w-[350px] h-[400px] flex flex-col mx-auto'>
-      <Card className='w-full flex-1'>
-        <CardHeader className='pb-3'>
-          <div className='flex items-center justify-between'>
-            <CardTitle className='text-lg'>
-              {isBreak
-                ? remaining > settings.longBreakDuration * 60
-                  ? 'Long Break'
-                  : 'Break'
-                : 'Pomodoro'}
-            </CardTitle>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              <SettingsIcon className='w-4 h-4' />
-            </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent className='flex flex-col items-center gap-4'>
-          <div className='text-4xl font-mono font-bold'>
-            {formatTime(remaining)}
-          </div>
-
-          <div className='text-sm text-muted-foreground text-center'>
-            {isRunning
-              ? isBreak
-                ? 'Break in progress'
-                : 'Focus time'
-              : `Start a ${settings.workDuration}-minute session`}
-          </div>
-
-          <div className='text-sm text-muted-foreground'>
-            {isInitializing ? (
-              <div className='flex items-center gap-2'>
-                <div className='animate-spin rounded-full h-3 w-3 border-b-2 border-primary'></div>
-                Loading...
-              </div>
-            ) : completedPomodoros > 0 ? (
-              `Completed: ${completedPomodoros} pomodoro${
-                completedPomodoros !== 1 ? 's' : ''
-              }`
-            ) : (
-              'Completed: 0 pomodoros'
-            )}
-          </div>
-
-          <div className='flex gap-2'>
-            {isRunning ? (
+    <div className='h-full flex flex-col gap-2'>
+      <div className='overflow-y-scroll hide-scrollbar-on-idle pb-4'>
+        <Card className='w-full'>
+          <CardHeader className='pb-3'>
+            <div className='flex items-center justify-between'>
+              <CardTitle className='text-lg'>
+                {isBreak ? 'Break Timer' : 'Pomodoro Timer'}
+              </CardTitle>
               <Button
-                variant='destructive'
-                onClick={stopPomodoro}
-                disabled={isLoading}
-                className='flex items-center gap-2'
+                variant='ghost'
+                size='sm'
+                onClick={() => setShowSettings(!showSettings)}
+                className='h-8 w-8 p-0'
               >
-                <PauseIcon className='w-4 h-4' />
-                Stop
+                <SettingsIcon className='h-4 w-4' />
               </Button>
-            ) : (
-              <>
-                <Button
-                  onClick={startPomodoro}
-                  disabled={isLoading}
-                  className='flex items-center gap-2'
-                >
-                  <PlayIcon className='w-4 h-4' />
-                  Start Work
-                </Button>
-                <Button
-                  variant='outline'
-                  onClick={startBreak}
-                  disabled={isLoading}
-                >
-                  Start Break
-                </Button>
-              </>
-            )}
-          </div>
-
-          {completedPomodoros > 0 && (
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={resetPomodoro}
-              className='flex items-center gap-2'
-            >
-              <RotateCcwIcon className='w-4 h-4' />
-              Reset Count
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-
-      {showSettings && (
-        <Card className='w-full mt-4'>
-          <CardHeader>
-            <CardTitle className='text-sm'>Settings</CardTitle>
+            </div>
           </CardHeader>
           <CardContent className='space-y-4'>
-            <div className='grid grid-cols-2 gap-4'>
-              <div>
-                <Label htmlFor='workDuration'>Work (min)</Label>
-                <Select
-                  value={settings.workDuration.toString()}
-                  onValueChange={(value) =>
-                    handleSettingChange('workDuration', parseInt(value))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[15, 20, 25, 30, 45, 60].map((duration) => (
-                      <SelectItem key={duration} value={duration.toString()}>
-                        {duration}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className='text-center'>
+              <div className='text-4xl font-mono font-bold mb-2'>
+                {isInitializing ? (
+                  <div className='flex items-center justify-center gap-2'>
+                    <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-primary'></div>
+                    <span className='text-lg'>Loading...</span>
+                  </div>
+                ) : (
+                  formatTime(remaining)
+                )}
               </div>
-
-              <div>
-                <Label htmlFor='breakDuration'>Break (min)</Label>
-                <Select
-                  value={settings.breakDuration.toString()}
-                  onValueChange={(value) =>
-                    handleSettingChange('breakDuration', parseInt(value))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[3, 5, 10, 15].map((duration) => (
-                      <SelectItem key={duration} value={duration.toString()}>
-                        {duration}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className='text-sm text-muted-foreground'>
+                {isInitializing
+                  ? 'Loading...'
+                  : isBreak
+                  ? 'Break time'
+                  : 'Work time'}
               </div>
             </div>
 
-            <div className='flex items-center justify-between'>
-              <Label htmlFor='autoStartBreaks'>Auto-start breaks</Label>
-              <Switch
-                id='autoStartBreaks'
-                checked={settings.autoStartBreaks}
-                onCheckedChange={(checked) =>
-                  handleSettingChange('autoStartBreaks', checked)
-                }
-              />
+            <div className='text-sm text-muted-foreground text-center'>
+              {completedPomodoros > 0
+                ? `Completed: ${completedPomodoros} pomodoro${
+                    completedPomodoros !== 1 ? 's' : ''
+                  }`
+                : 'Completed: 0 pomodoros'}
             </div>
 
-            <div className='flex items-center justify-between'>
-              <Label htmlFor='autoStartWork'>Auto-start work</Label>
-              <Switch
-                id='autoStartWork'
-                checked={settings.autoStartWork}
-                onCheckedChange={(checked) =>
-                  handleSettingChange('autoStartWork', checked)
-                }
-              />
-            </div>
+            {!isInitializing && (
+              <>
+                <div className='flex gap-2 justify-center'>
+                  {isRunning ? (
+                    <Button
+                      variant='destructive'
+                      onClick={stopPomodoro}
+                      disabled={isLoading}
+                      className='flex items-center gap-2'
+                    >
+                      <PauseIcon className='w-4 h-4' />
+                      Stop
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={startPomodoro}
+                        disabled={isLoading}
+                        className='flex items-center gap-2'
+                      >
+                        <PlayIcon className='w-4 h-4' />
+                        Start Work
+                      </Button>
+                      <Button
+                        variant='outline'
+                        onClick={startBreak}
+                        disabled={isLoading}
+                      >
+                        Start Break
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {completedPomodoros > 0 && (
+                  <div className='flex justify-center'>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={resetPomodoro}
+                      className='flex items-center gap-2'
+                    >
+                      <RotateCcwIcon className='w-4 h-4' />
+                      Reset Count
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
-      )}
+
+        {showSettings && (
+          <Card className='w-full mt-4 flex-shrink-0'>
+            <CardHeader>
+              <CardTitle className='text-sm'>Settings</CardTitle>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <Label htmlFor='workDuration'>Work (min)</Label>
+                  <Select
+                    value={settings.workDuration.toString()}
+                    onValueChange={(value) =>
+                      handleSettingChange('workDuration', parseInt(value))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[15, 20, 25, 30, 45, 60].map((duration) => (
+                        <SelectItem key={duration} value={duration.toString()}>
+                          {duration}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor='breakDuration'>Break (min)</Label>
+                  <Select
+                    value={settings.breakDuration.toString()}
+                    onValueChange={(value) =>
+                      handleSettingChange('breakDuration', parseInt(value))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[3, 5, 10, 15].map((duration) => (
+                        <SelectItem key={duration} value={duration.toString()}>
+                          {duration}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <Label htmlFor='longBreakDuration'>Long Break (min)</Label>
+                  <Select
+                    value={settings.longBreakDuration.toString()}
+                    onValueChange={(value) =>
+                      handleSettingChange('longBreakDuration', parseInt(value))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 15, 20, 30].map((duration) => (
+                        <SelectItem key={duration} value={duration.toString()}>
+                          {duration}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor='longBreakInterval'>Long Break Every</Label>
+                  <Select
+                    value={settings.longBreakInterval.toString()}
+                    onValueChange={(value) =>
+                      handleSettingChange('longBreakInterval', parseInt(value))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[2, 3, 4, 5, 6].map((interval) => (
+                        <SelectItem key={interval} value={interval.toString()}>
+                          {interval} pomodoro{interval !== 1 ? 's' : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className='flex items-center justify-between'>
+                <Label htmlFor='autoStartBreaks'>Auto-start breaks</Label>
+                <Switch
+                  id='autoStartBreaks'
+                  checked={settings.autoStartBreaks}
+                  onCheckedChange={(checked) =>
+                    handleSettingChange('autoStartBreaks', checked)
+                  }
+                />
+              </div>
+
+              <div className='flex items-center justify-between'>
+                <Label htmlFor='autoStartWork'>Auto-start work</Label>
+                <Switch
+                  id='autoStartWork'
+                  checked={settings.autoStartWork}
+                  onCheckedChange={(checked) =>
+                    handleSettingChange('autoStartWork', checked)
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
