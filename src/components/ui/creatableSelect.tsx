@@ -17,6 +17,7 @@ export const StyledCreatableSelect = (
       borderRadius: 'var(--radius-md)',
       height: '2.25rem',
       minHeight: '2.25rem',
+      cursor: 'pointer',
     }),
     menu: (provided) => ({
       ...provided,
