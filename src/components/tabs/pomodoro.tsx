@@ -121,11 +121,9 @@ const Popup = () => {
   }, [settings, isInitializing]);
 
   const startPomodoro = async () => {
-    console.log('startPomodoro called');
     setIsLoading(true);
     try {
       const duration = settings.workDuration;
-      console.log('Sending startPomodoro message with duration:', duration);
       chrome.runtime.sendMessage(
         {
           action: 'startPomodoro',
@@ -134,7 +132,6 @@ const Popup = () => {
           completedPomodoros,
         },
         (response) => {
-          console.log('startPomodoro response:', response);
           if (chrome.runtime.lastError || !response?.success) {
             console.error(
               'Error starting pomodoro:',
@@ -158,19 +155,12 @@ const Popup = () => {
   };
 
   const startBreak = async () => {
-    console.log('startBreak called');
     setIsLoading(true);
     try {
       const isLongBreak = completedPomodoros % settings.longBreakInterval === 0;
       const duration = isLongBreak
         ? settings.longBreakDuration
         : settings.breakDuration;
-      console.log(
-        'Sending startBreak message with duration:',
-        duration,
-        'isLongBreak:',
-        isLongBreak
-      );
       chrome.runtime.sendMessage(
         {
           action: 'startPomodoro',
@@ -180,7 +170,6 @@ const Popup = () => {
           completedPomodoros,
         },
         (response) => {
-          console.log('startBreak response:', response);
           if (chrome.runtime.lastError || !response?.success) {
             console.error(
               'Error starting break:',

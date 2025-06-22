@@ -119,6 +119,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
         }
       );
+    } else if (request.action === 'showBreakReminder') {
+      // Handle break reminder with audio notification
+      const customMessage = request.message || 'Time for a break!';
+      playNotificationSound('Break reminder');
+
+      chrome.notifications.create(
+        {
+          type: 'basic',
+          iconUrl: 'icon.png',
+          title: 'Break Reminder! 🎯',
+          message: customMessage,
+          priority: 2,
+        },
+        (notificationId) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error creating break reminder notification:',
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+          } else {
+            sendResponse({ success: true });
+          }
+        }
+      );
     } else {
       sendResponse({ success: false, error: 'Unknown action' });
     }
@@ -186,6 +214,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
           ? 'Break time is over. Ready to work?'
           : 'Great work! Take a break 🍅⏲️';
 
+        // Play notification sound with appropriate message
+        const audioMessage = isBreak
+          ? 'Break time complete'
+          : 'Pomodoro complete';
+        playNotificationSound(audioMessage);
+
         chrome.notifications.create(
           {
             type: 'basic',
@@ -226,6 +260,25 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     console.error('Error handling alarm:', error);
   }
 });
+
+// Function to play notification sound
+function playNotificationSound(message) {
+  try {
+    // Use chrome.tts for audio notification in background script
+    chrome.tts.speak(message, {
+      rate: 0.8, // Slower rate for better clarity
+      pitch: 1.2, // Higher pitch for better audibility
+      volume: 1.0, // Maximum volume (100%)
+      onEvent: function (event) {
+        if (event.type === 'error') {
+          console.error('TTS error:', event);
+        }
+      },
+    });
+  } catch (error) {
+    console.error('Error playing notification sound:', error);
+  }
+}
 
 // Handle notification clicks
 chrome.notifications.onClicked.addListener((notificationId) => {
