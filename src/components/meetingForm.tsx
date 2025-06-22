@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 import { DurationSelector } from './ui/durationSelector';
 import {
   getChromeStorageData,
   setChromeStorageData,
 } from '../utils/chromeStorageUtils';
+import { StyledCreatableSelect } from './ui/creatableSelect';
 
 interface Duration {
   value: number;
@@ -19,6 +19,7 @@ interface MeetingFormProps {
   setSelectedProject: (project: OptionType | null) => void;
   selectedDuration: Duration | null;
   setSelectedDuration: (duration: Duration | null) => void;
+  isTimerRunning?: boolean;
 }
 
 export const MeetingForm = ({
@@ -28,6 +29,7 @@ export const MeetingForm = ({
   setSelectedProject,
   selectedDuration,
   setSelectedDuration,
+  isTimerRunning = false,
 }: MeetingFormProps) => {
   const [people, setPeople] = useState<OptionType[]>([]);
   const [projects, setProjects] = useState<OptionType[]>([]);
@@ -60,9 +62,8 @@ export const MeetingForm = ({
 
   return (
     <>
-      <CreatableSelect
+      <StyledCreatableSelect
         placeholder={`Select or type person's name`}
-        classNamePrefix='rs'
         value={selectedPerson}
         onChange={(e) => setSelectedPerson(e)}
         onCreateOption={handleCreatePerson}
@@ -70,15 +71,15 @@ export const MeetingForm = ({
         isClearable
         isSearchable
       />
-      <CreatableSelect
+      <StyledCreatableSelect
         placeholder='Select or type project name'
-        classNamePrefix='rs'
         value={selectedProject}
         onChange={(e) => setSelectedProject(e)}
         onCreateOption={handleCreateProject}
         options={projects}
         isClearable
         isSearchable
+        isDisabled={isTimerRunning}
       />
       <DurationSelector
         selectedDuration={selectedDuration}

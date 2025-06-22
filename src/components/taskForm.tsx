@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 import { DurationSelector } from './ui/durationSelector';
 import {
@@ -9,6 +8,7 @@ import {
 import { Button } from './ui/button';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
+import { StyledCreatableSelect } from './ui/creatableSelect';
 
 type TimerOption = 'startTimer' | 'selectDuration';
 
@@ -23,6 +23,7 @@ interface TaskFormProps {
   selectedDuration: DurationOption | null;
   setSelectedDuration: (value: DurationOption | null) => void;
   taskRecorded: boolean;
+  isTimerRunning?: boolean;
 }
 
 export const TaskForm = ({
@@ -31,6 +32,7 @@ export const TaskForm = ({
   selectedDuration,
   setSelectedDuration,
   taskRecorded,
+  isTimerRunning = false,
 }: TaskFormProps) => {
   const [projects, setProjects] = useState<OptionType[]>([]);
   const [timerOption, setTimerOption] = useState<TimerOption>('selectDuration');
@@ -113,8 +115,8 @@ export const TaskForm = ({
   };
 
   return (
-    <>
-      <CreatableSelect
+    <div className='space-y-4'>
+      <StyledCreatableSelect
         placeholder='Select or type project name'
         value={selectedProject}
         onChange={(e) => setSelectedProject(e)}
@@ -122,17 +124,19 @@ export const TaskForm = ({
         options={projects}
         isClearable
         isSearchable
+        isDisabled={isTimerRunning}
       />
       <RadioGroup
         value={timerOption}
         onValueChange={(value: string) => setTimerOption(value as TimerOption)}
+        className='mt-4'
       >
         <div className='flex space-x-4'>
-          <div className='flex items-center space-x-2'>
+          <div className='flex space-x-2'>
             <RadioGroupItem value='selectDuration' id='selectDuration' />
             <Label htmlFor='selectDuration'>Select Duration</Label>
           </div>
-          <div className='flex items-center space-x-2'>
+          <div className='flex space-x-2'>
             <RadioGroupItem value='startTimer' id='startTimer' />
             <Label htmlFor='startTimer'>Timer</Label>
           </div>
@@ -154,6 +158,6 @@ export const TaskForm = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };

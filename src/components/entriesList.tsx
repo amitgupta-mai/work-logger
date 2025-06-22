@@ -22,8 +22,16 @@ export const EntriesList = ({
     return isToday(selectedDate);
   }, [selectedDate]);
 
+  if (entries.length === 0) {
+    return (
+      <div className='flex items-center justify-center h-full text-muted-foreground'>
+        <p>No logs for this day.</p>
+      </div>
+    );
+  }
+
   return (
-    <ul className='mt-3 h-[140px] overflow-hidden hover:overflow-y-auto'>
+    <ul>
       {entries.map((entry) => (
         <Entry
           key={entry.id}

@@ -11,14 +11,19 @@ type LogType = 'Meeting' | 'Task';
 interface LogTypeSelectorProps {
   logType: LogType;
   setLogType: (type: LogType) => void;
+  disabled?: boolean;
 }
 
 export const LogTypeSelector = ({
   setLogType,
   logType,
+  disabled = false,
 }: LogTypeSelectorProps) => {
   return (
-    <Select onValueChange={(value) => setLogType(value as LogType)}>
+    <Select
+      onValueChange={(value) => setLogType(value as LogType)}
+      disabled={disabled}
+    >
       <SelectTrigger>
         <SelectValue placeholder={logType} />
       </SelectTrigger>
