@@ -4,6 +4,10 @@ import './App.css';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import { Header } from './components/header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
+import Pomodoro from './components/tabs/pomodoro';
+import BreakReminder from './components/tabs/breakReminder';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   return (
@@ -19,12 +23,24 @@ const App = () => {
           <Logger />
         </TabsContent>
         <TabsContent value='pomodoro'>
-          <div>Pomodoro Timer. Coming soon.</div>
+          <Pomodoro />
         </TabsContent>
         <TabsContent value='break'>
-          <div>Break Reminder. Coming soon.</div>
+          <BreakReminder />
         </TabsContent>
       </Tabs>
+      <ToastContainer
+        position='top-right'
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme='dark'
+      />
     </div>
   );
 };
