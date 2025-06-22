@@ -111,17 +111,18 @@ const Popup = () => {
     setIsLoading(true);
     try {
       const duration = settings.workDuration;
-
       chrome.runtime.sendMessage(
         {
           action: 'startPomodoro',
           duration,
           isBreak: false,
-          completedPomodoros,
         },
-        () => {
-          if (chrome.runtime.lastError) {
-            console.error('Error starting pomodoro:', chrome.runtime.lastError);
+        (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error starting pomodoro:',
+              chrome.runtime.lastError || response?.error
+            );
             toast.error('Failed to start pomodoro');
           } else {
             setIsRunning(true);
@@ -147,7 +148,6 @@ const Popup = () => {
       const duration = isLongBreak
         ? settings.longBreakDuration
         : settings.breakDuration;
-
       chrome.runtime.sendMessage(
         {
           action: 'startPomodoro',
@@ -155,9 +155,12 @@ const Popup = () => {
           isBreak: true,
           isLongBreak,
         },
-        () => {
-          if (chrome.runtime.lastError) {
-            console.error('Error starting break:', chrome.runtime.lastError);
+        (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error starting break:',
+              chrome.runtime.lastError || response?.error
+            );
             toast.error('Failed to start break');
           } else {
             setIsRunning(true);
@@ -180,15 +183,18 @@ const Popup = () => {
   const stopPomodoro = async () => {
     setIsLoading(true);
     try {
-      chrome.runtime.sendMessage({ action: 'stopPomodoro' }, () => {
-        if (chrome.runtime.lastError) {
-          console.error('Error stopping pomodoro:', chrome.runtime.lastError);
+      chrome.runtime.sendMessage({ action: 'stopPomodoro' }, (response) => {
+        if (chrome.runtime.lastError || !response?.success) {
+          console.error(
+            'Error stopping pomodoro:',
+            chrome.runtime.lastError || response?.error
+          );
           toast.error('Failed to stop pomodoro');
         } else {
           setRemaining(settings.workDuration * 60);
           setIsRunning(false);
           setIsBreak(false);
-          toast.success('Timer stopped');
+          toast.info('Timer stopped');
         }
         setIsLoading(false);
       });
@@ -220,7 +226,7 @@ const Popup = () => {
   };
 
   return (
-    <div className='w-[350px] h-[400px] flex flex-col'>
+    <div className='w-[350px] h-[400px] flex flex-col mx-auto'>
       <Card className='w-full flex-1'>
         <CardHeader className='pb-3'>
           <div className='flex items-center justify-between'>

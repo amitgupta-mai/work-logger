@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import CreatableSelect from 'react-select/creatable';
 import { OptionType } from '../types';
 import { DurationSelector } from './ui/durationSelector';
 import {
@@ -9,6 +8,7 @@ import {
 import { Button } from './ui/button';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
+import { StyledCreatableSelect } from './ui/creatableSelect';
 
 type TimerOption = 'startTimer' | 'selectDuration';
 
@@ -114,7 +114,7 @@ export const TaskForm = ({
 
   return (
     <>
-      <CreatableSelect
+      <StyledCreatableSelect
         placeholder='Select or type project name'
         value={selectedProject}
         onChange={(e) => setSelectedProject(e)}

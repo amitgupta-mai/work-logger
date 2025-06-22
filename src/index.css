@@ -144,9 +144,3 @@ body {
     display: none;
   }
 }
-
-/* For React-Select component */
-.rs__control {
-  background-color: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-}

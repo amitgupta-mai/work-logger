@@ -147,6 +147,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.error('Error in message listener:', error);
     sendResponse({ success: false, error: error.message });
   }
+
+  // Return true to indicate you wish to send a response asynchronously
+  return true;
 });
 
 // Handle alarms with better error handling

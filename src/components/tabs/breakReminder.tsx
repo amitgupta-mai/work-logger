@@ -192,7 +192,7 @@ const BreakReminder = () => {
   };
 
   return (
-    <div className='w-[350px] flex flex-col'>
+    <div className='w-[350px] flex flex-col mx-auto'>
       <Card className='w-full'>
         <CardHeader className='p-4 pb-2'>
           <div className='flex items-center justify-between'>
