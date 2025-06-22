@@ -73,6 +73,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const duration = request.duration || 25;
       const isBreak = request.isBreak || false;
       const startTime = Date.now();
+      const completedPomodoros = request.completedPomodoros || 0;
 
       chrome.alarms.create('pomodoroAlarm', {
         delayInMinutes: duration,
@@ -83,42 +84,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         pomodoroStartTime: startTime,
         pomodoroDuration: duration * 60, // store in seconds
         isBreak: isBreak,
+        completedPomodoros: completedPomodoros,
       };
 
-      // Update completed pomodoros if this is a work session
-      if (!isBreak) {
-        chrome.storage.local.get('completedPomodoros', (result) => {
-          const currentCompleted = result.completedPomodoros || 0;
-          storageData.completedPomodoros = currentCompleted + 1;
-
-          chrome.storage.local.set(storageData, () => {
-            if (chrome.runtime.lastError) {
-              console.error(
-                'Error starting pomodoro:',
-                chrome.runtime.lastError
-              );
-              sendResponse({
-                success: false,
-                error: chrome.runtime.lastError.message,
-              });
-            } else {
-              sendResponse({ success: true });
-            }
+      chrome.storage.local.set(storageData, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Error starting pomodoro:', chrome.runtime.lastError);
+          sendResponse({
+            success: false,
+            error: chrome.runtime.lastError.message,
           });
-        });
-      } else {
-        chrome.storage.local.set(storageData, () => {
-          if (chrome.runtime.lastError) {
-            console.error('Error starting break:', chrome.runtime.lastError);
-            sendResponse({
-              success: false,
-              error: chrome.runtime.lastError.message,
-            });
-          } else {
-            sendResponse({ success: true });
-          }
-        });
-      }
+        } else {
+          sendResponse({ success: true });
+        }
+      });
     } else if (request.action === 'stopPomodoro') {
       chrome.alarms.clear('pomodoroAlarm');
       chrome.storage.local.set(

@@ -113,7 +113,7 @@ export const TaskForm = ({
   };
 
   return (
-    <>
+    <div className='space-y-4'>
       <StyledCreatableSelect
         placeholder='Select or type project name'
         value={selectedProject}
@@ -126,13 +126,14 @@ export const TaskForm = ({
       <RadioGroup
         value={timerOption}
         onValueChange={(value: string) => setTimerOption(value as TimerOption)}
+        className='mt-4'
       >
         <div className='flex space-x-4'>
-          <div className='flex items-center space-x-2'>
+          <div className='flex space-x-2'>
             <RadioGroupItem value='selectDuration' id='selectDuration' />
             <Label htmlFor='selectDuration'>Select Duration</Label>
           </div>
-          <div className='flex items-center space-x-2'>
+          <div className='flex space-x-2'>
             <RadioGroupItem value='startTimer' id='startTimer' />
             <Label htmlFor='startTimer'>Timer</Label>
           </div>
@@ -154,6 +155,6 @@ export const TaskForm = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };

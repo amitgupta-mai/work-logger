@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -36,6 +36,7 @@ const Popup = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const loadSettings = useCallback(async () => {
     try {
@@ -90,6 +91,13 @@ const Popup = () => {
           setRemaining(remainingTime);
           setCompletedPomodoros(completed);
 
+          if (isInitializing) {
+            // Add a small delay to make the loading state visible
+            setTimeout(() => {
+              setIsInitializing(false);
+            }, 500);
+          }
+
           // Auto-start break or work if enabled
           if (remainingTime === 0 && response.data.isPomodoroRunning) {
             if (isBreakMode && settings.autoStartWork) {
@@ -143,8 +151,7 @@ const Popup = () => {
   const startBreak = async () => {
     setIsLoading(true);
     try {
-      const isLongBreak =
-        (completedPomodoros + 1) % settings.longBreakInterval === 0;
+      const isLongBreak = completedPomodoros % settings.longBreakInterval === 0;
       const duration = isLongBreak
         ? settings.longBreakDuration
         : settings.breakDuration;
@@ -154,6 +161,7 @@ const Popup = () => {
           duration,
           isBreak: true,
           isLongBreak,
+          completedPomodoros,
         },
         (response) => {
           if (chrome.runtime.lastError || !response?.success) {
@@ -183,21 +191,29 @@ const Popup = () => {
   const stopPomodoro = async () => {
     setIsLoading(true);
     try {
-      chrome.runtime.sendMessage({ action: 'stopPomodoro' }, (response) => {
-        if (chrome.runtime.lastError || !response?.success) {
-          console.error(
-            'Error stopping pomodoro:',
-            chrome.runtime.lastError || response?.error
-          );
-          toast.error('Failed to stop pomodoro');
-        } else {
-          setRemaining(settings.workDuration * 60);
-          setIsRunning(false);
-          setIsBreak(false);
-          toast.info('Timer stopped');
+      chrome.runtime.sendMessage(
+        { action: 'stopPomodoro' },
+        async (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error stopping pomodoro:',
+              chrome.runtime.lastError || response?.error
+            );
+            toast.error('Failed to stop pomodoro');
+          } else {
+            if (!isBreak) {
+              const newCompleted = completedPomodoros + 1;
+              setCompletedPomodoros(newCompleted);
+              await setStorageDataAsync({ completedPomodoros: newCompleted });
+            }
+            setRemaining(settings.workDuration * 60);
+            setIsRunning(false);
+            setIsBreak(false);
+            toast.info('Timer stopped');
+          }
+          setIsLoading(false);
         }
-        setIsLoading(false);
-      });
+      );
     } catch (error) {
       console.error('Error stopping pomodoro:', error);
       toast.error('Failed to stop pomodoro');
@@ -260,12 +276,20 @@ const Popup = () => {
               : `Start a ${settings.workDuration}-minute session`}
           </div>
 
-          {completedPomodoros > 0 && (
-            <div className='text-sm text-muted-foreground'>
-              Completed: {completedPomodoros} pomodoro
-              {completedPomodoros !== 1 ? 's' : ''}
-            </div>
-          )}
+          <div className='text-sm text-muted-foreground'>
+            {isInitializing ? (
+              <div className='flex items-center gap-2'>
+                <div className='animate-spin rounded-full h-3 w-3 border-b-2 border-primary'></div>
+                Loading...
+              </div>
+            ) : completedPomodoros > 0 ? (
+              `Completed: ${completedPomodoros} pomodoro${
+                completedPomodoros !== 1 ? 's' : ''
+              }`
+            ) : (
+              'Completed: 0 pomodoros'
+            )}
+          </div>
 
           <div className='flex gap-2'>
             {isRunning ? (

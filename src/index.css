@@ -144,3 +144,20 @@ body {
     display: none;
   }
 }
+
+.hide-scrollbar-on-idle::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hide-scrollbar-on-idle::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hide-scrollbar-on-idle::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.hide-scrollbar-on-idle:hover::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+}

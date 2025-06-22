@@ -23,7 +23,7 @@ export const EntriesList = ({
   }, [selectedDate]);
 
   return (
-    <ul className='mt-3 h-[140px] overflow-hidden hover:overflow-y-auto'>
+    <ul className='pb-12'>
       {entries.map((entry) => (
         <Entry
           key={entry.id}

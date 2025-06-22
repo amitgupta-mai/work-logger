@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -65,9 +65,12 @@ const BreakReminder = () => {
     try {
       await setStorageDataAsync({ breakSettings: newSettings });
       setSettings(newSettings);
-      toast.success('Break settings saved!');
+      toast.success('Settings Saved', {
+        description: 'Your break reminders have been updated.',
+        duration: 2000,
+      });
     } catch (error) {
-      console.error('Error saving break settings:', error);
+      console.error('Error saving settings:', error);
       toast.error('Failed to save settings');
     }
   }, []);
@@ -128,7 +131,7 @@ const BreakReminder = () => {
 
     if (settings.reminderType === 'popup' || settings.reminderType === 'both') {
       toast.info(message, {
-        autoClose: 10000,
+        duration: 10000,
         position: 'top-center',
       });
     }
