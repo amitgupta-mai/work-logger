@@ -389,7 +389,7 @@ const Popup = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {[15, 20, 25, 30, 45, 60].map((duration) => (
+                      {[1, 15, 20, 25, 30, 45, 60].map((duration) => (
                         <SelectItem key={duration} value={duration.toString()}>
                           {duration}
                         </SelectItem>

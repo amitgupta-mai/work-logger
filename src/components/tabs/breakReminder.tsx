@@ -120,13 +120,27 @@ const BreakReminder = () => {
       settings.reminderType === 'notification' ||
       settings.reminderType === 'both'
     ) {
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icon.png',
-        title: 'Break Time! 🎯',
-        message: message,
-        priority: 2,
-      });
+      chrome.runtime.sendMessage(
+        {
+          action: 'showBreakReminder',
+          message: message,
+        },
+        (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error showing break reminder:',
+              chrome.runtime.lastError || response?.error
+            );
+            chrome.notifications.create({
+              type: 'basic',
+              iconUrl: 'icon.png',
+              title: 'Break Time! 🎯',
+              message: message,
+              priority: 2,
+            });
+          }
+        }
+      );
     }
 
     if (settings.reminderType === 'popup' || settings.reminderType === 'both') {

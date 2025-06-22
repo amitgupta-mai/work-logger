@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TimeZen",
   "version": "1.0.0",
-  "description": "Log your work easily",
+  "description": "Track time, manage tasks, and boost productivity with Pomodoro timer and break reminders",
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
@@ -15,5 +15,5 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "activeTab", "alarms", "notifications"]
+  "permissions": ["storage", "activeTab", "alarms", "notifications", "tts"]
 }
