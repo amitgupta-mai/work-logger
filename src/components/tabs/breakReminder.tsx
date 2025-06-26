@@ -309,6 +309,17 @@ const BreakReminder = () => {
                 </Select>
               </div>
 
+              <div className='flex items-center justify-between'>
+                <Label htmlFor='playSound'>Play Sound</Label>
+                <Switch
+                  id='playSound'
+                  checked={settings.ttsEnabled ?? true}
+                  onCheckedChange={(checked) =>
+                    handleSettingChange('ttsEnabled', checked)
+                  }
+                />
+              </div>
+
               <div>
                 <Label htmlFor='reminderType'>Reminder Type</Label>
                 <Select

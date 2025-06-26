@@ -122,31 +122,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.action === 'showBreakReminder') {
       // Handle break reminder with audio notification
       const customMessage = request.message || 'Time for a break!';
-      playNotificationSound('Break reminder');
-
-      chrome.notifications.create(
-        {
-          type: 'basic',
-          iconUrl: 'icon.png',
-          title: 'Break Reminder! 🎯',
-          message: customMessage,
-          priority: 2,
-        },
-        (notificationId) => {
-          if (chrome.runtime.lastError) {
-            console.error(
-              'Error creating break reminder notification:',
-              chrome.runtime.lastError
-            );
-            sendResponse({
-              success: false,
-              error: chrome.runtime.lastError.message,
-            });
-          } else {
-            sendResponse({ success: true });
-          }
+      chrome.storage.local.get(['breakSettings'], (result) => {
+        const ttsEnabled =
+          result.breakSettings &&
+          typeof result.breakSettings.ttsEnabled === 'boolean'
+            ? result.breakSettings.ttsEnabled
+            : true; // default to true
+        if (ttsEnabled) {
+          playNotificationSound('Break reminder');
         }
-      );
+
+        chrome.notifications.create(
+          {
+            type: 'basic',
+            iconUrl: 'icon.png',
+            title: 'Break Reminder! 🎯',
+            message: customMessage,
+            priority: 2,
+          },
+          (notificationId) => {
+            if (chrome.runtime.lastError) {
+              console.error(
+                'Error creating break reminder notification:',
+                chrome.runtime.lastError
+              );
+              sendResponse({
+                success: false,
+                error: chrome.runtime.lastError.message,
+              });
+            } else {
+              sendResponse({ success: true });
+            }
+          }
+        );
+      });
     } else {
       sendResponse({ success: false, error: 'Unknown action' });
     }

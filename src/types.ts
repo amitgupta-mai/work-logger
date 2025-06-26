@@ -108,4 +108,5 @@ export interface BreakSettings {
   customMessage: string;
   lastBreakTime: number;
   nextBreakTime: number;
+  ttsEnabled?: boolean;
 }
