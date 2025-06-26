@@ -9,6 +9,7 @@ import { Button } from './ui/button';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { StyledCreatableSelect } from './ui/creatableSelect';
+import { RotateCcwIcon } from 'lucide-react';
 
 type TimerOption = 'startTimer' | 'selectDuration';
 
@@ -23,7 +24,7 @@ interface TaskFormProps {
   selectedDuration: DurationOption | null;
   setSelectedDuration: (value: DurationOption | null) => void;
   taskRecorded: boolean;
-  isTimerRunning?: boolean;
+  onElapsedTimeChange?: (elapsed: number) => void;
 }
 
 export const TaskForm = ({
@@ -32,12 +33,13 @@ export const TaskForm = ({
   selectedDuration,
   setSelectedDuration,
   taskRecorded,
-  isTimerRunning = false,
+  onElapsedTimeChange,
 }: TaskFormProps) => {
   const [projects, setProjects] = useState<OptionType[]>([]);
   const [timerOption, setTimerOption] = useState<TimerOption>('selectDuration');
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const selectorDisabled = elapsedTime > 0;
 
   useEffect(() => {
     getChromeStorageData(['projects'], (result: Record<string, unknown>) => {
@@ -87,6 +89,10 @@ export const TaskForm = ({
   }, [isRunning]);
 
   useEffect(() => {
+    if (onElapsedTimeChange) onElapsedTimeChange(elapsedTime);
+  }, [elapsedTime, onElapsedTimeChange]);
+
+  useEffect(() => {
     if (taskRecorded) {
       setElapsedTime(0);
       setSelectedDuration(null);
@@ -124,20 +130,29 @@ export const TaskForm = ({
         options={projects}
         isClearable
         isSearchable
-        isDisabled={isTimerRunning}
+        isDisabled={selectorDisabled}
       />
       <RadioGroup
         value={timerOption}
         onValueChange={(value: string) => setTimerOption(value as TimerOption)}
         className='mt-4'
+        disabled={selectorDisabled}
       >
         <div className='flex space-x-4'>
           <div className='flex space-x-2'>
-            <RadioGroupItem value='selectDuration' id='selectDuration' />
+            <RadioGroupItem
+              value='selectDuration'
+              id='selectDuration'
+              disabled={selectorDisabled}
+            />
             <Label htmlFor='selectDuration'>Select Duration</Label>
           </div>
           <div className='flex space-x-2'>
-            <RadioGroupItem value='startTimer' id='startTimer' />
+            <RadioGroupItem
+              value='startTimer'
+              id='startTimer'
+              disabled={selectorDisabled}
+            />
             <Label htmlFor='startTimer'>Timer</Label>
           </div>
         </div>
@@ -146,6 +161,7 @@ export const TaskForm = ({
         <DurationSelector
           selectedDuration={selectedDuration}
           setSelectedDuration={setSelectedDuration}
+          isDisabled={selectorDisabled}
         />
       )}
       {timerOption === 'startTimer' && (
@@ -153,8 +169,25 @@ export const TaskForm = ({
           <Button onClick={handleStartStop} disabled={!selectedProject}>
             {isRunning ? 'Stop Timer' : 'Start Timer'}
           </Button>
-          <div>
-            {Math.floor(elapsedTime / 60)} min {elapsedTime % 60} sec
+          <div className='flex items-center gap-2'>
+            <span>
+              {Math.floor(elapsedTime / 60)} min {elapsedTime % 60} sec
+            </span>
+            {elapsedTime > 0 && !isRunning && (
+              <Button
+                variant='outline'
+                size='icon'
+                title='Reset'
+                onClick={() => {
+                  setElapsedTime(0);
+                  setSelectedDuration(null);
+                  setChromeStorageData({ elapsedTime: 0 });
+                  if (onElapsedTimeChange) onElapsedTimeChange(0);
+                }}
+              >
+                <RotateCcwIcon className='w-4 h-4' />
+              </Button>
+            )}
           </div>
         </div>
       )}

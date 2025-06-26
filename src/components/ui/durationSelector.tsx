@@ -14,9 +14,11 @@ const durationOptions = Array.from({ length: 32 }, (_, i) => ({
 export const DurationSelector = ({
   selectedDuration,
   setSelectedDuration,
+  isDisabled = false,
 }: {
   selectedDuration: { value: number; label: string } | null;
   setSelectedDuration: (value: { value: number; label: string } | null) => void;
+  isDisabled?: boolean;
 }) => {
   return (
     <Select
@@ -28,8 +30,9 @@ export const DurationSelector = ({
             null
         )
       }
+      disabled={isDisabled}
     >
-      <SelectTrigger className='w-[180px]'>
+      <SelectTrigger className='w-[180px]' disabled={isDisabled}>
         <SelectValue placeholder='Duration' />
       </SelectTrigger>
       <SelectContent>

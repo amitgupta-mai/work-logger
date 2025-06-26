@@ -373,6 +373,7 @@ const Popup = () => {
                     onValueChange={(value) =>
                       handleSettingChange('workDuration', parseInt(value))
                     }
+                    disabled={isRunning}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -394,6 +395,7 @@ const Popup = () => {
                     onValueChange={(value) =>
                       handleSettingChange('breakDuration', parseInt(value))
                     }
+                    disabled={isRunning}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -417,6 +419,7 @@ const Popup = () => {
                     onValueChange={(value) =>
                       handleSettingChange('longBreakDuration', parseInt(value))
                     }
+                    disabled={isRunning}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -438,6 +441,7 @@ const Popup = () => {
                     onValueChange={(value) =>
                       handleSettingChange('longBreakInterval', parseInt(value))
                     }
+                    disabled={isRunning}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -471,6 +475,17 @@ const Popup = () => {
                   checked={settings.autoStartWork}
                   onCheckedChange={(checked) =>
                     handleSettingChange('autoStartWork', checked)
+                  }
+                />
+              </div>
+
+              <div className='flex items-center justify-between'>
+                <Label htmlFor='playSound'>Play Sound</Label>
+                <Switch
+                  id='playSound'
+                  checked={settings.ttsEnabled ?? true}
+                  onCheckedChange={(checked) =>
+                    handleSettingChange('ttsEnabled', checked)
                   }
                 />
               </div>

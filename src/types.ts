@@ -96,6 +96,7 @@ export interface PomodoroSettings {
   autoStartBreaks: boolean;
   autoStartWork: boolean;
   longBreakInterval: number;
+  ttsEnabled?: boolean;
 }
 
 // Break Settings

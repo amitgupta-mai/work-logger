@@ -199,62 +199,74 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         }
       });
     } else if (alarm.name === 'pomodoroAlarm') {
-      chrome.storage.local.get(['isPomodoroRunning', 'isBreak'], (result) => {
-        if (chrome.runtime.lastError) {
-          console.error(
-            'Error getting pomodoro status:',
-            chrome.runtime.lastError
+      chrome.storage.local.get(
+        ['isPomodoroRunning', 'isBreak', 'pomodoroSettings'],
+        (result) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error getting pomodoro status:',
+              chrome.runtime.lastError
+            );
+            return;
+          }
+
+          const isBreak = result.isBreak || false;
+          const title = isBreak
+            ? 'Break Complete! 🎯'
+            : 'Pomodoro Complete! 🍅';
+          const message = isBreak
+            ? 'Break time is over. Ready to work?'
+            : 'Great work! Take a break 🍅⏲️';
+
+          // Play notification sound with appropriate message if ttsEnabled is true
+          const audioMessage = isBreak
+            ? 'Break time complete'
+            : 'Pomodoro complete';
+          const ttsEnabled =
+            result.pomodoroSettings &&
+            typeof result.pomodoroSettings.ttsEnabled === 'boolean'
+              ? result.pomodoroSettings.ttsEnabled
+              : true; // default to true
+          if (ttsEnabled) {
+            playNotificationSound(audioMessage);
+          }
+
+          chrome.notifications.create(
+            {
+              type: 'basic',
+              iconUrl: 'icon.png',
+              title: title,
+              message: message,
+              priority: 2,
+            },
+            (notificationId) => {
+              if (chrome.runtime.lastError) {
+                console.error(
+                  'Error creating notification:',
+                  chrome.runtime.lastError
+                );
+              }
+            }
           );
-          return;
+
+          chrome.storage.local.set(
+            {
+              isPomodoroRunning: false,
+              pomodoroStartTime: null,
+              pomodoroDuration: null,
+              isBreak: false,
+            },
+            () => {
+              if (chrome.runtime.lastError) {
+                console.error(
+                  'Error resetting pomodoro state:',
+                  chrome.runtime.lastError
+                );
+              }
+            }
+          );
         }
-
-        const isBreak = result.isBreak || false;
-        const title = isBreak ? 'Break Complete! 🎯' : 'Pomodoro Complete! 🍅';
-        const message = isBreak
-          ? 'Break time is over. Ready to work?'
-          : 'Great work! Take a break 🍅⏲️';
-
-        // Play notification sound with appropriate message
-        const audioMessage = isBreak
-          ? 'Break time complete'
-          : 'Pomodoro complete';
-        playNotificationSound(audioMessage);
-
-        chrome.notifications.create(
-          {
-            type: 'basic',
-            iconUrl: 'icon.png',
-            title: title,
-            message: message,
-            priority: 2,
-          },
-          (notificationId) => {
-            if (chrome.runtime.lastError) {
-              console.error(
-                'Error creating notification:',
-                chrome.runtime.lastError
-              );
-            }
-          }
-        );
-
-        chrome.storage.local.set(
-          {
-            isPomodoroRunning: false,
-            pomodoroStartTime: null,
-            pomodoroDuration: null,
-            isBreak: false,
-          },
-          () => {
-            if (chrome.runtime.lastError) {
-              console.error(
-                'Error resetting pomodoro state:',
-                chrome.runtime.lastError
-              );
-            }
-          }
-        );
-      });
+      );
     }
   } catch (error) {
     console.error('Error handling alarm:', error);

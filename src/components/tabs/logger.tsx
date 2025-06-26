@@ -40,6 +40,7 @@ const Logger = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
+  const [taskElapsedTime, setTaskElapsedTime] = useState<number>(0);
 
   // hack to record task after if has been done once
   useEffect(() => {
@@ -234,7 +235,7 @@ const Logger = () => {
             <LogTypeSelector
               logType={logType}
               setLogType={setLogType}
-              disabled={isTimerRunning}
+              disabled={isTimerRunning || taskElapsedTime > 0}
             />
             <TotalTimeDisplay todayEntries={todayEntries} />
           </div>
@@ -245,7 +246,7 @@ const Logger = () => {
               selectedDuration={selectedDuration}
               setSelectedDuration={setSelectedDuration}
               taskRecorded={taskRecorded}
-              isTimerRunning={isTimerRunning}
+              onElapsedTimeChange={setTaskElapsedTime}
             />
           ) : (
             <MeetingForm
