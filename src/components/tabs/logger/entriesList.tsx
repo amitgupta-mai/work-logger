@@ -1,19 +1,7 @@
 import { useMemo } from 'react';
 import Entry from './entry';
 import { isToday } from '@/utils/dateTimeUtils';
-
-interface Entry {
-  id: string;
-  entry: string;
-  startTime?: string;
-  endTime?: string;
-}
-
-interface EntriesListProps {
-  entries: Entry[];
-  handleDeleteEntry: (id: string) => void;
-  selectedDate: Date;
-}
+import { EntriesListProps, EntryType } from '../../../types';
 
 export const EntriesList = ({
   entries,
@@ -34,7 +22,7 @@ export const EntriesList = ({
 
   return (
     <ul>
-      {entries.map((entry) => (
+      {entries.map((entry: EntryType) => (
         <Entry
           key={entry.id}
           entry={entry.entry}

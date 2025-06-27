@@ -137,3 +137,15 @@ export interface HandleAddEntryArgs {
   setTaskRecorded: (v: boolean) => void;
   resetFields: () => void;
 }
+
+export interface EntriesListProps {
+  entries: EntryType[];
+  handleDeleteEntry: (id: string) => void;
+  selectedDate: Date;
+}
+
+export interface LogTypeSelectorProps {
+  logType: LogType;
+  setLogType: (type: LogType) => void;
+  disabled?: boolean;
+}
