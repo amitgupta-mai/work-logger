@@ -4,13 +4,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './ui/alert-dialog';
+} from '../../ui/alert-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogContent,
   AlertDialogFooter,
-} from './ui/alert-dialog';
+} from '../../ui/alert-dialog';
 import { Trash2Icon } from 'lucide-react';
 
 interface EntryProps {

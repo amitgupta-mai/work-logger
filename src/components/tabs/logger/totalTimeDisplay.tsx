@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { EntryType } from '../types';
+import { EntryType } from '../../../types';
 
 interface TotalTimeDisplayProps {
   todayEntries: EntryType[];

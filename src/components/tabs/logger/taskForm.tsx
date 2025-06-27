@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import { OptionType } from '../types';
-import { DurationSelector } from './ui/durationSelector';
+import { OptionType } from '../../../types';
+import { DurationSelector } from '../../ui/durationSelector';
 import {
   getChromeStorageData,
   setChromeStorageData,
-} from '../utils/chromeStorageUtils';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { Label } from './ui/label';
-import { StyledCreatableSelect } from './ui/creatableSelect';
+} from '../../../utils/chromeStorageUtils';
+import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
+import { Label } from '../../ui/label';
+import { StyledCreatableSelect } from '../../ui/creatableSelect';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
+} from '../../ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
 
 interface DurationOption {
   value: number;
