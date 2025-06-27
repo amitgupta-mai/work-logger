@@ -41,6 +41,17 @@ const Logger = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [taskElapsedTime, setTaskElapsedTime] = useState<number>(0);
+  const [startTime, setStartTime] = useState<string>('');
+  const [startAmPm, setStartAmPm] = useState<string>('AM');
+  const [endTime, setEndTime] = useState<string>('');
+  const [endAmPm, setEndAmPm] = useState<string>('AM');
+  const [durationMode, setDurationMode] = useState<'dropdown' | 'manual'>(
+    'dropdown'
+  );
+  const [startHour, setStartHour] = useState('');
+  const [startMinute, setStartMinute] = useState('');
+  const [endHour, setEndHour] = useState('');
+  const [endMinute, setEndMinute] = useState('');
 
   // hack to record task after if has been done once
   useEffect(() => {
@@ -94,19 +105,75 @@ const Logger = () => {
   }, [loadEntries]);
 
   const validateForm = useCallback((): boolean => {
-    const validations = [
-      validateProject(selectedProject),
-      validateDuration(selectedDuration?.value || null),
-    ];
+    const validations = [validateProject(selectedProject)];
 
     if (logType === 'Meeting') {
       validations.push(validatePerson(selectedPerson));
+      if (durationMode === 'dropdown') {
+        validations.push(validateDuration(selectedDuration?.value || null));
+      } else {
+        // Manual mode: validate all time fields and duration
+        if (
+          !startHour ||
+          !startMinute ||
+          !startAmPm ||
+          !endHour ||
+          !endMinute ||
+          !endAmPm
+        ) {
+          validations.push({
+            isValid: false,
+            errors: ['All time fields are required'],
+          });
+        } else if (getManualDuration() <= 0) {
+          validations.push({
+            isValid: false,
+            errors: ['End time must be after start time'],
+          });
+        }
+      }
+    } else if (logType === 'Task') {
+      if (durationMode === 'dropdown') {
+        validations.push(validateDuration(selectedDuration?.value || null));
+      } else {
+        // Manual mode: validate all time fields and duration
+        if (
+          !startHour ||
+          !startMinute ||
+          !startAmPm ||
+          !endHour ||
+          !endMinute ||
+          !endAmPm
+        ) {
+          validations.push({
+            isValid: false,
+            errors: ['All time fields are required'],
+          });
+        } else if (getManualDuration() <= 0) {
+          validations.push({
+            isValid: false,
+            errors: ['End time must be after start time'],
+          });
+        }
+      }
     }
 
     const combinedValidation = combineValidations(...validations);
     setValidationErrors(combinedValidation.errors);
     return combinedValidation.isValid;
-  }, [logType, selectedProject, selectedDuration, selectedPerson]);
+  }, [
+    logType,
+    selectedProject,
+    selectedDuration,
+    selectedPerson,
+    durationMode,
+    startHour,
+    startMinute,
+    startAmPm,
+    endHour,
+    endMinute,
+    endAmPm,
+  ]);
 
   const handleAddEntry = async () => {
     if (!validateForm()) {
@@ -121,10 +188,38 @@ const Logger = () => {
 
     setIsLoading(true);
     try {
-      let entryText = `Project: ${selectedProject?.label} - ${selectedDuration?.label}`;
-
+      let durationLabel = '';
+      if (durationMode === 'dropdown') {
+        durationLabel = selectedDuration?.label || '';
+      } else {
+        const manualDuration = getManualDuration();
+        durationLabel = manualDuration > 0 ? `${manualDuration} min` : '';
+      }
+      let entryText = `Project: ${selectedProject?.label} - ${durationLabel}`;
+      if (logType === 'Task' && durationMode === 'manual') {
+        // Format start and end time as 'hh:mm AM/PM'
+        const formatTime = (h: string, m: string, ampm: string) => {
+          if (!h || !m || !ampm) return '';
+          return `${h}:${m} ${ampm}`;
+        };
+        const formattedStart = formatTime(startHour, startMinute, startAmPm);
+        const formattedEnd = formatTime(endHour, endMinute, endAmPm);
+        if (formattedStart && formattedEnd) {
+          entryText += ` (${formattedStart} - ${formattedEnd})`;
+        }
+      }
       if (logType === 'Meeting' && selectedPerson) {
-        entryText = `Meeting: ${selectedPerson.label} - ${selectedDuration?.label} (Project: ${selectedProject?.label})`;
+        let meetingTime = '';
+        const formatTime = (h: string, m: string, ampm: string) => {
+          if (!h || !m || !ampm) return '';
+          return `${h}:${m} ${ampm}`;
+        };
+        const formattedStart = formatTime(startHour, startMinute, startAmPm);
+        const formattedEnd = formatTime(endHour, endMinute, endAmPm);
+        if (formattedStart && formattedEnd) {
+          meetingTime = ` (${formattedStart} - ${formattedEnd})`;
+        }
+        entryText = `Meeting: ${selectedPerson.label} - ${durationLabel}${meetingTime} (Project: ${selectedProject?.label})`;
       }
 
       const success = await addEntry(
@@ -133,7 +228,9 @@ const Logger = () => {
         setTodayEntries,
         logType,
         selectedProject?.label,
-        selectedDuration?.value,
+        durationMode === 'dropdown'
+          ? selectedDuration?.value
+          : getManualDuration(),
         selectedPerson?.label
       );
 
@@ -157,11 +254,30 @@ const Logger = () => {
     setSelectedProject(null);
     setSelectedDuration(null);
     setValidationErrors([]);
+    setStartTime('');
+    setStartAmPm('AM');
+    setEndTime('');
+    setEndAmPm('AM');
+    setDurationMode('dropdown');
+    setStartHour('');
+    setStartMinute('');
+    setEndHour('');
+    setEndMinute('');
   };
 
   const copyEntries = async () => {
     try {
-      const entriesText = todayEntries.map((e) => e.entry).join('\n');
+      const entriesText = todayEntries
+        .map((e) => {
+          let timeStr = '';
+          if (e.startTime && e.endTime)
+            timeStr = `${e.startTime} - ${e.endTime}: `;
+          else if (e.startTime) timeStr = `${e.startTime}: `;
+          else if (e.endTime) timeStr = `${e.endTime}: `;
+          return `${timeStr}${e.entry.trim()}`;
+        })
+        .join('\r\n');
+      console.log('entriesText:', JSON.stringify(entriesText));
       await navigator.clipboard.writeText(entriesText);
       toast.success('Entries copied to clipboard!');
     } catch (error) {
@@ -200,13 +316,95 @@ const Logger = () => {
     }
   };
 
+  // Helper to calculate duration in manual mode
+  const getManualDuration = () => {
+    if (!startHour || !startMinute || !endHour || !endMinute) return 0;
+    let sh = parseInt(startHour, 10);
+    let eh = parseInt(endHour, 10);
+    if (isNaN(sh) || isNaN(eh)) return 0;
+    if (sh === 12) sh = 0;
+    if (eh === 12) eh = 0;
+    const start = sh * 60 + parseInt(startMinute, 10);
+    const end = eh * 60 + parseInt(endMinute, 10);
+    return end > start ? end - start : 0;
+  };
+
   const isAddEntryDisabled = useMemo(() => {
     if (isLoading) return true;
     if (logType === 'Meeting') {
-      return !selectedPerson || !selectedProject || !selectedDuration;
+      if (durationMode === 'dropdown') {
+        return !selectedPerson || !selectedProject || !selectedDuration;
+      } else {
+        // manual mode: require all start/end fields and valid duration
+        return (
+          !selectedPerson ||
+          !selectedProject ||
+          !startHour ||
+          !startMinute ||
+          !startAmPm ||
+          !endHour ||
+          !endMinute ||
+          !endAmPm ||
+          getManualDuration() <= 0
+        );
+      }
     }
-    return !selectedProject || !selectedDuration;
-  }, [logType, selectedPerson, selectedProject, selectedDuration, isLoading]);
+    if (logType === 'Task') {
+      if (durationMode === 'dropdown') {
+        return !selectedProject || !selectedDuration;
+      } else {
+        // manual mode: require all start/end fields and valid duration
+        return (
+          !selectedProject ||
+          !startHour ||
+          !startMinute ||
+          !startAmPm ||
+          !endHour ||
+          !endMinute ||
+          !endAmPm ||
+          getManualDuration() <= 0
+        );
+      }
+    }
+    return false;
+  }, [
+    logType,
+    selectedPerson,
+    selectedProject,
+    selectedDuration,
+    isLoading,
+    durationMode,
+    startHour,
+    startMinute,
+    startAmPm,
+    endHour,
+    endMinute,
+    endAmPm,
+  ]);
+
+  // Remove immediateDurationError and instead show a toast when the error condition is met
+  useEffect(() => {
+    if (
+      durationMode === 'manual' &&
+      startHour &&
+      startMinute &&
+      startAmPm &&
+      endHour &&
+      endMinute &&
+      endAmPm &&
+      getManualDuration() <= 0
+    ) {
+      toast.error('End time must be after start time');
+    }
+  }, [
+    durationMode,
+    startHour,
+    startMinute,
+    startAmPm,
+    endHour,
+    endMinute,
+    endAmPm,
+  ]);
 
   const handleDeleteEntryWrapper = async (id: string) => {
     try {
@@ -229,8 +427,8 @@ const Logger = () => {
 
   return (
     <div className='h-full flex flex-col gap-2'>
-      <div className='flex-shrink-0 rounded-xl border bg-card text-card-foreground shadow-sm'>
-        <div className='p-2 space-y-1.5'>
+      <div className='flex-shrink-0 rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col max-h-[250px]'>
+        <div className='p-2 space-y-1.5 flex-1 overflow-y-auto hide-scrollbar-on-idle pb-0'>
           <div className='flex justify-between items-center'>
             <LogTypeSelector
               logType={logType}
@@ -247,6 +445,20 @@ const Logger = () => {
               setSelectedDuration={setSelectedDuration}
               taskRecorded={taskRecorded}
               onElapsedTimeChange={setTaskElapsedTime}
+              startTime={startTime}
+              startAmPm={startAmPm}
+              endTime={endTime}
+              endAmPm={endAmPm}
+              durationMode={durationMode}
+              setDurationMode={setDurationMode}
+              startHour={startHour}
+              setStartHour={setStartHour}
+              startMinute={startMinute}
+              setStartMinute={setStartMinute}
+              endHour={endHour}
+              setEndHour={setEndHour}
+              endMinute={endMinute}
+              setEndMinute={setEndMinute}
             />
           ) : (
             <MeetingForm
@@ -257,6 +469,20 @@ const Logger = () => {
               selectedDuration={selectedDuration}
               setSelectedDuration={setSelectedDuration}
               isTimerRunning={isTimerRunning}
+              durationMode={durationMode}
+              setDurationMode={setDurationMode}
+              startHour={startHour}
+              setStartHour={setStartHour}
+              startMinute={startMinute}
+              setStartMinute={setStartMinute}
+              startAmPm={startAmPm}
+              setStartAmPm={setStartAmPm}
+              endHour={endHour}
+              setEndHour={setEndHour}
+              endMinute={endMinute}
+              setEndMinute={setEndMinute}
+              endAmPm={endAmPm}
+              setEndAmPm={setEndAmPm}
             />
           )}
           {validationErrors.length > 0 && (
@@ -271,13 +497,15 @@ const Logger = () => {
               </ul>
             </div>
           )}
-          <Button
-            onClick={handleAddEntry}
-            disabled={isAddEntryDisabled}
-            className='w-full'
-          >
-            {isLoading ? 'Adding...' : 'Add Entry'}
-          </Button>
+          <div className='sticky bottom-0 left-0 w-full bg-card p-4 z-10'>
+            <Button
+              onClick={handleAddEntry}
+              disabled={isAddEntryDisabled}
+              className='w-full'
+            >
+              {isLoading ? 'Adding...' : 'Add Entry'}
+            </Button>
+          </div>
         </div>
       </div>
 

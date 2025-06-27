@@ -23,6 +23,8 @@ export type EntryType = {
   project?: string;
   duration?: number;
   person?: string;
+  startTime?: string; // e.g., "09:00"
+  endTime?: string; // e.g., "10:00"
 };
 
 // Chrome Storage Types

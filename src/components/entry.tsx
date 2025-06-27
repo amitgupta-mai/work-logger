@@ -17,11 +17,28 @@ interface EntryProps {
   entry: string;
   onDelete: () => void;
   isDeletable: boolean;
+  startTime?: string;
+  endTime?: string;
 }
 
-const Entry: React.FC<EntryProps> = ({ entry, onDelete, isDeletable }) => {
+const Entry: React.FC<EntryProps> = ({
+  entry,
+  onDelete,
+  isDeletable,
+  startTime,
+  endTime,
+}) => {
   return (
     <div className='group flex items-center h-10 border-b border-gray-200'>
+      <span className='text-xs text-muted-foreground mr-2'>
+        {startTime && endTime
+          ? `${startTime} - ${endTime}`
+          : startTime
+          ? `${startTime}`
+          : endTime
+          ? `${endTime}`
+          : ''}
+      </span>
       <span className='text-sm truncate semibold block max-w-[300px]'>
         {entry}
       </span>

@@ -9,7 +9,9 @@ export const addEntry = async (
   type: LogType = 'Task',
   project?: string,
   duration?: number,
-  person?: string
+  person?: string,
+  startTime?: string,
+  endTime?: string
 ): Promise<boolean> => {
   try {
     const today = getCurrentDateKey();
@@ -23,6 +25,8 @@ export const addEntry = async (
       project,
       duration,
       person,
+      startTime,
+      endTime,
     };
 
     setTodayEntries([newEntry, ...todayEntries]);
@@ -207,10 +211,13 @@ export const exportEntries = (entries: EntryType[]): string => {
   const csvData = entries.map((entry) => {
     return `${entry.date},${entry.type || 'Task'},${entry.project || ''},${
       entry.person || ''
-    },${entry.duration || 0},${entry.entry}`;
+    },${entry.duration || 0},${entry.startTime || ''},${entry.endTime || ''},${
+      entry.entry
+    }`;
   });
 
-  const headers = 'Date,Type,Project,Person,Duration (min),Description\n';
+  const headers =
+    'Date,Type,Project,Person,Duration (min),Start Time,End Time,Description\n';
   return headers + csvData.join('\n');
 };
 

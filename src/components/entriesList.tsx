@@ -5,6 +5,8 @@ import { isToday } from '@/utils/dateTimeUtils';
 interface Entry {
   id: string;
   entry: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 interface EntriesListProps {
@@ -38,6 +40,8 @@ export const EntriesList = ({
           entry={entry.entry}
           onDelete={() => handleDeleteEntry(entry.id)}
           isDeletable={isDeletable}
+          startTime={entry.startTime}
+          endTime={entry.endTime}
         />
       ))}
     </ul>
