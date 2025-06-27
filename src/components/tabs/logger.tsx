@@ -318,14 +318,50 @@ const Logger = () => {
 
   // Helper to calculate duration in manual mode
   const getManualDuration = () => {
-    if (!startHour || !startMinute || !endHour || !endMinute) return 0;
+    if (
+      !startHour ||
+      !startMinute ||
+      !endHour ||
+      !endMinute ||
+      !startAmPm ||
+      !endAmPm
+    )
+      return 0;
     let sh = parseInt(startHour, 10);
     let eh = parseInt(endHour, 10);
-    if (isNaN(sh) || isNaN(eh)) return 0;
-    if (sh === 12) sh = 0;
-    if (eh === 12) eh = 0;
-    const start = sh * 60 + parseInt(startMinute, 10);
-    const end = eh * 60 + parseInt(endMinute, 10);
+    const sm = parseInt(startMinute, 10);
+    const em = parseInt(endMinute, 10);
+    if (isNaN(sh) || isNaN(eh) || isNaN(sm) || isNaN(em)) return 0;
+    // Convert to 24-hour time
+    const origSh = sh,
+      origEh = eh;
+    const origStartAmPm = startAmPm,
+      origEndAmPm = endAmPm;
+    if (startAmPm === 'PM' && sh !== 12) sh += 12;
+    if (startAmPm === 'AM' && sh === 12) sh = 0;
+    if (endAmPm === 'PM' && eh !== 12) eh += 12;
+    if (endAmPm === 'AM' && eh === 12) eh = 0;
+    const start = sh * 60 + sm;
+    const end = eh * 60 + em;
+    console.log('getManualDuration:', {
+      startHour,
+      startMinute,
+      startAmPm,
+      endHour,
+      endMinute,
+      endAmPm,
+      origSh,
+      origEh,
+      origStartAmPm,
+      origEndAmPm,
+      sh,
+      eh,
+      sm,
+      em,
+      start,
+      end,
+      duration: end > start ? end - start : 0,
+    });
     return end > start ? end - start : 0;
   };
 
@@ -497,7 +533,7 @@ const Logger = () => {
               </ul>
             </div>
           )}
-          <div className='sticky bottom-0 left-0 w-full bg-card p-4 z-10'>
+          <div className='sticky bottom-0 left-0 w-full bg-card py-2 z-10'>
             <Button
               onClick={handleAddEntry}
               disabled={isAddEntryDisabled}

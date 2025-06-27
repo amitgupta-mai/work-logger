@@ -199,14 +199,20 @@ export const MeetingForm = ({
         className='mb-2 flex gap-6 items-center'
       >
         <div className='flex items-center gap-2'>
-          <RadioGroupItem value='dropdown' id='dropdown' className='mt-px' />
-          <Label htmlFor='dropdown' className='cursor-pointer'>
+          <RadioGroupItem value='dropdown' id='dropdown' className='' />
+          <Label
+            htmlFor='dropdown'
+            className='cursor-pointer m-0 p-0 leading-none'
+          >
             Select Duration
           </Label>
         </div>
         <div className='flex items-center gap-2'>
-          <RadioGroupItem value='manual' id='manual' className='mt-px' />
-          <Label htmlFor='manual' className='cursor-pointer'>
+          <RadioGroupItem value='manual' id='manual' className='' />
+          <Label
+            htmlFor='manual'
+            className='cursor-pointer m-0 p-0 leading-none'
+          >
             Set Start/End Time
           </Label>
         </div>
