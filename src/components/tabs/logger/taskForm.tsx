@@ -1,128 +1,13 @@
 import { useEffect, useState } from 'react';
-import { OptionType } from '../../../types';
+import { TaskFormProps } from '../../../types';
 import { DurationSelector } from '../../ui/durationSelector';
-import {
-  getChromeStorageData,
-  setChromeStorageData,
-} from '../../../utils/chromeStorageUtils';
+import { setChromeStorageData } from '../../../utils/chromeStorageUtils';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { Label } from '../../ui/label';
-import { StyledCreatableSelect } from '../../ui/creatableSelect';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
-
-interface DurationOption {
-  value: number;
-  label: string;
-}
-
-interface TaskFormProps {
-  selectedProject: OptionType | null;
-  setSelectedProject: (project: OptionType | null) => void;
-  selectedDuration: DurationOption | null;
-  setSelectedDuration: (value: DurationOption | null) => void;
-  taskRecorded: boolean;
-  onElapsedTimeChange?: (elapsed: number) => void;
-  startTime: string;
-  startAmPm: string;
-  endTime: string;
-  endAmPm: string;
-  durationMode: 'dropdown' | 'manual';
-  setDurationMode: (mode: 'dropdown' | 'manual') => void;
-  startHour: string;
-  setStartHour: (v: string) => void;
-  startMinute: string;
-  setStartMinute: (v: string) => void;
-  endHour: string;
-  setEndHour: (v: string) => void;
-  endMinute: string;
-  setEndMinute: (v: string) => void;
-}
-
-function TimePicker({
-  hour,
-  onHourChange,
-  minute,
-  onMinuteChange,
-  ampm,
-  onAmPmChange,
-  label,
-  error,
-  touched,
-  onHourBlur,
-  onMinuteBlur,
-  onAmPmBlur,
-}: {
-  hour: string;
-  onHourChange: (v: string) => void;
-  minute: string;
-  onMinuteChange: (v: string) => void;
-  ampm: string;
-  onAmPmChange: (v: string) => void;
-  label: string;
-  error?: string;
-  touched: boolean;
-  onHourBlur: () => void;
-  onMinuteBlur: () => void;
-  onAmPmBlur: () => void;
-}) {
-  const hourOptions = Array.from({ length: 12 }, (_, i) =>
-    (i + 1).toString().padStart(2, '0')
-  );
-  const minuteOptions = Array.from({ length: 60 }, (_, i) =>
-    i.toString().padStart(2, '0')
-  );
-  return (
-    <div>
-      <label className='block text-xs mb-1'>{label}</label>
-      <div className='flex gap-2 items-center'>
-        <Select value={hour} onValueChange={onHourChange}>
-          <SelectTrigger className='w-[80px] h-8' onBlur={onHourBlur}>
-            <SelectValue placeholder='hh' />
-          </SelectTrigger>
-          <SelectContent>
-            {hourOptions.map((h) => (
-              <SelectItem key={h} value={h}>
-                {h}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <span>:</span>
-        <Select value={minute} onValueChange={onMinuteChange}>
-          <SelectTrigger className='w-[80px] h-8' onBlur={onMinuteBlur}>
-            <SelectValue placeholder='mm' />
-          </SelectTrigger>
-          <SelectContent>
-            {minuteOptions.map((m) => (
-              <SelectItem key={m} value={m}>
-                {m}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={ampm} onValueChange={onAmPmChange}>
-          <SelectTrigger className='w-[100px] h-8' onBlur={onAmPmBlur}>
-            <SelectValue placeholder='AM/PM' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='AM'>AM</SelectItem>
-            <SelectItem value='PM'>PM</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      {touched && error && (
-        <div className='text-xs text-red-500 mt-1'>{error}</div>
-      )}
-    </div>
-  );
-}
+import TimePicker from './TimePicker';
+import CreatableSelectField from './CreatableSelectField';
+import { useOptionsLoader } from './useOptionsLoader';
 
 export const TaskForm = ({
   selectedProject,
@@ -130,9 +15,10 @@ export const TaskForm = ({
   selectedDuration,
   setSelectedDuration,
   taskRecorded,
-  onElapsedTimeChange,
   startTime,
+  startAmPm,
   endTime,
+  endAmPm,
   durationMode,
   setDurationMode,
   startHour,
@@ -144,71 +30,20 @@ export const TaskForm = ({
   endMinute,
   setEndMinute,
 }: TaskFormProps) => {
-  const [projects, setProjects] = useState<OptionType[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const selectorDisabled = elapsedTime > 0;
+  const selectorDisabled = false;
   const [timeErrors, setTimeErrors] = useState<{
     start?: string;
     end?: string;
   }>({});
-  const [startAmPm, setStartAmPm] = useState('AM');
-  const [endAmPm, setEndAmPm] = useState('AM');
+
+  const { projects, loadOptions, handleCreateProject } = useOptionsLoader();
 
   useEffect(() => {
-    getChromeStorageData(['projects'], (result: Record<string, unknown>) => {
-      if (result.projects && Array.isArray(result.projects)) {
-        setProjects(result.projects as OptionType[]);
-      }
-    });
-  }, [setSelectedProject, selectedProject]);
-
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    getChromeStorageData(
-      ['elapsedTime', 'isRunning', 'activeProject'],
-      (result) => {
-        const isTimerRunning =
-          typeof result.isRunning === 'boolean' && result.isRunning;
-        const elapsed =
-          typeof result.elapsedTime === 'number' ? result.elapsedTime : 0;
-
-        setIsRunning(isTimerRunning);
-        setElapsedTime(elapsed);
-
-        if (isTimerRunning) {
-          setSelectedProject(result?.activeProject as OptionType);
-          setDurationMode('dropdown');
-          intervalId = setInterval(() => {
-            getChromeStorageData(
-              ['elapsedTime', 'isRunning'],
-              (intervalResult) => {
-                if (typeof intervalResult.elapsedTime === 'number') {
-                  setElapsedTime(intervalResult.elapsedTime);
-                }
-                if (typeof intervalResult.isRunning === 'boolean') {
-                  setIsRunning(intervalResult.isRunning);
-                }
-              }
-            );
-          }, 1000);
-        }
-      }
-    );
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [isRunning]);
-
-  useEffect(() => {
-    if (onElapsedTimeChange) onElapsedTimeChange(elapsedTime);
-  }, [elapsedTime, onElapsedTimeChange]);
+    loadOptions();
+  }, [loadOptions]);
 
   useEffect(() => {
     if (taskRecorded) {
-      setElapsedTime(0);
       setSelectedDuration(null);
       setChromeStorageData({ elapsedTime: 0 });
     }
@@ -219,12 +54,6 @@ export const TaskForm = ({
     const endError = validateTimeInput(endTime);
     setTimeErrors({ start: startError, end: endError });
   }, [startTime, endTime]);
-
-  const handleCreateProject = (inputValue: string) => {
-    const newProject = { label: inputValue, value: inputValue };
-    setSelectedProject(newProject);
-    setChromeStorageData({ projects: [...projects, newProject] });
-  };
 
   function validateTimeInput(time: string) {
     if (!time) return 'Time is required';
@@ -254,10 +83,10 @@ export const TaskForm = ({
 
   return (
     <div className='space-y-4'>
-      <StyledCreatableSelect
+      <CreatableSelectField
         placeholder='Select or type project name'
         value={selectedProject}
-        onChange={(e) => setSelectedProject(e)}
+        onChange={setSelectedProject}
         onCreateOption={handleCreateProject}
         options={projects}
         isClearable
@@ -325,7 +154,7 @@ export const TaskForm = ({
                   minute={startMinute}
                   onMinuteChange={setStartMinute}
                   ampm={startAmPm}
-                  onAmPmChange={setStartAmPm}
+                  onAmPmChange={() => {}}
                   label=''
                   error={timeErrors.start}
                   touched={false}
@@ -344,7 +173,7 @@ export const TaskForm = ({
                   minute={endMinute}
                   onMinuteChange={setEndMinute}
                   ampm={endAmPm}
-                  onAmPmChange={setEndAmPm}
+                  onAmPmChange={() => {}}
                   label=''
                   error={timeErrors.end}
                   touched={false}

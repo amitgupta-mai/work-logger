@@ -1,119 +1,12 @@
-import { useEffect, useState } from 'react';
-import { OptionType } from '../../../types';
+import { useEffect } from 'react';
+import { MeetingFormProps } from '../../../types';
 import { DurationSelector } from '../../ui/durationSelector';
-import {
-  getChromeStorageData,
-  setChromeStorageData,
-} from '../../../utils/chromeStorageUtils';
-import { StyledCreatableSelect } from '../../ui/creatableSelect';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
 import { Label } from '../../ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
-
-interface Duration {
-  value: number;
-  label: string;
-}
-
-interface MeetingFormProps {
-  selectedPerson: OptionType | null;
-  setSelectedPerson: (person: OptionType | null) => void;
-  selectedProject: OptionType | null;
-  setSelectedProject: (project: OptionType | null) => void;
-  selectedDuration: Duration | null;
-  setSelectedDuration: (duration: Duration | null) => void;
-  isTimerRunning?: boolean;
-  durationMode: 'dropdown' | 'manual';
-  setDurationMode: (mode: 'dropdown' | 'manual') => void;
-  startHour: string;
-  setStartHour: (v: string) => void;
-  startMinute: string;
-  setStartMinute: (v: string) => void;
-  startAmPm: string;
-  setStartAmPm: (v: string) => void;
-  endHour: string;
-  setEndHour: (v: string) => void;
-  endMinute: string;
-  setEndMinute: (v: string) => void;
-  endAmPm: string;
-  setEndAmPm: (v: string) => void;
-}
-
-function TimePicker({
-  hour,
-  onHourChange,
-  minute,
-  onMinuteChange,
-  ampm,
-  onAmPmChange,
-  label,
-  error,
-}: {
-  hour: string;
-  onHourChange: (v: string) => void;
-  minute: string;
-  onMinuteChange: (v: string) => void;
-  ampm: string;
-  onAmPmChange: (v: string) => void;
-  label: string;
-  error?: string;
-}) {
-  const hourOptions = Array.from({ length: 12 }, (_, i) =>
-    (i + 1).toString().padStart(2, '0')
-  );
-  const minuteOptions = Array.from({ length: 60 }, (_, i) =>
-    i.toString().padStart(2, '0')
-  );
-  return (
-    <div>
-      <label className='block text-xs mb-1'>{label}</label>
-      <div className='flex gap-2 items-center'>
-        <Select value={hour} onValueChange={onHourChange}>
-          <SelectTrigger className='w-[80px] h-8'>
-            <SelectValue placeholder='hh' />
-          </SelectTrigger>
-          <SelectContent>
-            {hourOptions.map((h) => (
-              <SelectItem key={h} value={h}>
-                {h}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <span>:</span>
-        <Select value={minute} onValueChange={onMinuteChange}>
-          <SelectTrigger className='w-[80px] h-8'>
-            <SelectValue placeholder='mm' />
-          </SelectTrigger>
-          <SelectContent>
-            {minuteOptions.map((m) => (
-              <SelectItem key={m} value={m}>
-                {m}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={ampm} onValueChange={onAmPmChange}>
-          <SelectTrigger className='w-[100px] h-8'>
-            <SelectValue placeholder='AM/PM' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='AM'>AM</SelectItem>
-            <SelectItem value='PM'>PM</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      {error && <div className='text-xs text-red-500 mt-1'>{error}</div>}
-    </div>
-  );
-}
+import TimePicker from './TimePicker';
+import CreatableSelectField from './CreatableSelectField';
+import { useOptionsLoader } from './useOptionsLoader';
 
 export const MeetingForm = ({
   selectedPerson,
@@ -138,53 +31,36 @@ export const MeetingForm = ({
   endAmPm,
   setEndAmPm,
 }: MeetingFormProps) => {
-  const [people, setPeople] = useState<OptionType[]>([]);
-  const [projects, setProjects] = useState<OptionType[]>([]);
+  const {
+    people,
+    projects,
+    loadOptions,
+    handleCreatePerson,
+    handleCreateProject,
+  } = useOptionsLoader();
 
   useEffect(() => {
-    getChromeStorageData(
-      ['people', 'projects'],
-      (result: Record<string, unknown>) => {
-        if (result.people && Array.isArray(result.people)) {
-          setPeople(result.people as OptionType[]);
-        }
-        if (result.projects && Array.isArray(result.projects)) {
-          setProjects(result.projects as OptionType[]);
-        }
-      }
-    );
-  }, [setSelectedPerson, setSelectedProject, selectedPerson, selectedProject]);
-
-  const handleCreatePerson = (inputValue: string) => {
-    const newPerson = { label: inputValue, value: inputValue };
-    setSelectedPerson(newPerson);
-    setChromeStorageData({ people: [...people, newPerson] });
-  };
-
-  const handleCreateProject = (inputValue: string) => {
-    const newProject = { label: inputValue, value: inputValue };
-    setSelectedProject(newProject);
-    setChromeStorageData({ projects: [...projects, newProject] });
-  };
+    loadOptions();
+  }, [loadOptions]);
 
   const formatTime = (h: string, m: string, ampm: string) =>
     h && m ? `${h}:${m} ${ampm}` : '--:--';
 
   return (
     <>
-      <StyledCreatableSelect
+      <CreatableSelectField
         placeholder={`Select or type person's name`}
         value={selectedPerson}
-        onChange={(e) => setSelectedPerson(e)}
+        onChange={setSelectedPerson}
         onCreateOption={handleCreatePerson}
         options={people}
         isClearable
         isSearchable
       />
-      <StyledCreatableSelect
+      <CreatableSelectField
         placeholder='Select or type project name'
         value={selectedProject}
-        onChange={(e) => setSelectedProject(e)}
+        onChange={setSelectedProject}
         onCreateOption={handleCreateProject}
         options={projects}
         isClearable

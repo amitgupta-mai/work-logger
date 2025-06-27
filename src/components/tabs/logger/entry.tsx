@@ -12,14 +12,7 @@ import {
   AlertDialogFooter,
 } from '../../ui/alert-dialog';
 import { Trash2Icon } from 'lucide-react';
-
-interface EntryProps {
-  entry: string;
-  onDelete: () => void;
-  isDeletable: boolean;
-  startTime?: string;
-  endTime?: string;
-}
+import { EntryProps } from '../../../types';
 
 const Entry: React.FC<EntryProps> = ({
   entry,

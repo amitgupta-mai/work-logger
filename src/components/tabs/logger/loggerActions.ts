@@ -1,30 +1,7 @@
 import { toast } from 'sonner';
 import { addEntry, handleDeleteEntry } from '../../../utils/entryUtils';
 import { format } from 'date-fns';
-import { EntryType, OptionType, LogType } from '../../../types';
-
-export interface HandleAddEntryArgs {
-  validateForm: () => boolean;
-  selectedDate: Date;
-  isTodayFn: (date: Date) => boolean;
-  setIsLoading: (v: boolean) => void;
-  durationMode: 'dropdown' | 'manual';
-  selectedDuration: { value: number; label: string } | null;
-  getManualDuration: () => number;
-  selectedProject: OptionType | null;
-  logType: LogType;
-  startHour: string;
-  startMinute: string;
-  startAmPm: string;
-  endHour: string;
-  endMinute: string;
-  endAmPm: string;
-  selectedPerson: OptionType | null;
-  todayEntries: EntryType[];
-  setTodayEntries: React.Dispatch<React.SetStateAction<EntryType[]>>;
-  setTaskRecorded: (v: boolean) => void;
-  resetFields: () => void;
-}
+import { EntryType, OptionType, HandleAddEntryArgs } from '../../../types';
 
 export async function handleAddEntryAction(args: HandleAddEntryArgs) {
   const {

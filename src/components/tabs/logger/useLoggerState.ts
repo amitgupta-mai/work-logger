@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import { EntryType, LogType } from '../../../types';
-import { OptionType } from '../../../types';
+import { EntryType, LogType, OptionType } from '../../../types';
 import { getStorageDataAsync } from '../../../utils/chromeStorageUtils';
 import { loadTheme } from '../../../utils/theme';
 import { format } from 'date-fns';

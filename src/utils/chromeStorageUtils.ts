@@ -1,4 +1,4 @@
-import { ChromeStorageData, StorageResponse } from '../types';
+import { ChromeStorageData, StorageResponse } from '../types/index';
 
 interface GetStorageCallback {
   (result: Record<string, unknown>): void;

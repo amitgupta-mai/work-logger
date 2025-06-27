@@ -1,9 +1,5 @@
 import { useMemo } from 'react';
-import { EntryType } from '../../../types';
-
-interface TotalTimeDisplayProps {
-  todayEntries: EntryType[];
-}
+import { TotalTimeDisplayProps } from '../../../types';
 
 const TotalTimeDisplay: React.FC<TotalTimeDisplayProps> = ({
   todayEntries,

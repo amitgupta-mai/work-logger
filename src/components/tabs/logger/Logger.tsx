@@ -68,7 +68,6 @@ const Logger = () => {
               selectedDuration={selectedDuration}
               setSelectedDuration={setSelectedDuration}
               taskRecorded={taskRecorded}
-              onElapsedTimeChange={undefined}
               startTime={startTime}
               startAmPm={startAmPm}
               endTime={endTime}
