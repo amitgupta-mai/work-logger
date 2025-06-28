@@ -72,7 +72,7 @@ export const MeetingForm = ({
   });
 
   return (
-    <div className='space-y-4'>
+    <div>
       <CreatableSelectField
         placeholder={`Select or type person's name`}
         value={selectedPerson}
@@ -81,6 +81,7 @@ export const MeetingForm = ({
         options={people}
         isClearable
         isSearchable
+        className='mb-2'
       />
       <CreatableSelectField
         placeholder='Select or type project name'
@@ -93,11 +94,11 @@ export const MeetingForm = ({
         isDisabled={isTimerRunning}
       />
       <RadioGroup
+        className='mt-2 mb-2 flex gap-6 items-center'
         value={durationMode}
         onValueChange={(value) =>
           setDurationMode(value as 'dropdown' | 'manual')
         }
-        className='mb-2 flex gap-6 items-center'
       >
         <div className='flex items-center gap-2'>
           <RadioGroupItem value='dropdown' id='dropdown' className='' />

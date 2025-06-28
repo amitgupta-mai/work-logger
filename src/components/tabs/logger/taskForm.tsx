@@ -74,7 +74,7 @@ export const TaskForm = ({
   });
 
   return (
-    <div className='space-y-4'>
+    <div>
       <CreatableSelectField
         placeholder='Select or type project name'
         value={selectedProject}

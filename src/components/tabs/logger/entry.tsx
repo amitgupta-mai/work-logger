@@ -44,7 +44,10 @@ const Entry: React.FC<EntryProps & { type?: string }> = ({
             {displayEntry}
           </span>
         </TooltipTrigger>
-        <TooltipContent side='top' className='max-w-[340px] mx-2 break-words'>
+        <TooltipContent
+          side='top'
+          className='max-w-[340px] mx-2 break-words bg-muted border border-muted shadow-inner text-foreground'
+        >
           {displayEntry}
         </TooltipContent>
       </Tooltip>
