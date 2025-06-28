@@ -13,6 +13,7 @@ import {
 } from '../../ui/alert-dialog';
 import { Trash2Icon } from 'lucide-react';
 import { EntryProps } from '../../../types';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
 
 const Entry: React.FC<EntryProps & { type?: string }> = ({
   entry,
@@ -37,9 +38,16 @@ const Entry: React.FC<EntryProps & { type?: string }> = ({
           ? `${endTime}`
           : ''}
       </span>
-      <span className='text-sm truncate semibold block max-w-[300px]'>
-        {displayEntry}
-      </span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className='text-sm truncate semibold block max-w-[300px] cursor-default'>
+            {displayEntry}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side='top' className='max-w-[340px] mx-2 break-words'>
+          {displayEntry}
+        </TooltipContent>
+      </Tooltip>
 
       {isDeletable && (
         <AlertDialog>
