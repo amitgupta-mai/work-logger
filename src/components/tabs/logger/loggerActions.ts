@@ -150,7 +150,14 @@ export async function copyEntriesAction(todayEntries: EntryType[]) {
           timeStr = `${e.startTime} - ${e.endTime}: `;
         else if (e.startTime) timeStr = `${e.startTime}: `;
         else if (e.endTime) timeStr = `${e.endTime}: `;
-        return `${timeStr}${e.entry.trim()}`;
+        let entryText = e.entry.trim();
+        if (
+          (e.type === 'Task' || !e.type) &&
+          entryText.startsWith('Project:')
+        ) {
+          entryText = entryText.replace(/^Project:/, 'Task:');
+        }
+        return `${timeStr}${entryText}`;
       })
       .join('\r\n');
     await navigator.clipboard.writeText(entriesText);

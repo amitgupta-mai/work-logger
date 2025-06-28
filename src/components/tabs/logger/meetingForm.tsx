@@ -46,6 +46,29 @@ export const MeetingForm = ({
   const formatTime = (h: string, m: string, ampm: string) =>
     h && m ? `${h}:${m} ${ampm}` : '--:--';
 
+  function getMinutes(hour: string, minute: string, ampm: string) {
+    let h = parseInt(hour, 10);
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + parseInt(minute, 10);
+  }
+
+  const isManualTimeFilled =
+    !!startHour &&
+    !!startMinute &&
+    !!startAmPm &&
+    !!endHour &&
+    !!endMinute &&
+    !!endAmPm;
+
+  const endTimeError =
+    durationMode === 'manual' &&
+    isManualTimeFilled &&
+    getMinutes(endHour, endMinute, endAmPm) <=
+      getMinutes(startHour, startMinute, startAmPm)
+      ? 'End time must be after start time'
+      : '';
+
   return (
     <>
       <CreatableSelectField
@@ -135,6 +158,7 @@ export const MeetingForm = ({
                 ampm={endAmPm}
                 onAmPmChange={setEndAmPm}
                 label='End Time'
+                error={endTimeError}
               />
             </TabsContent>
           </Tabs>

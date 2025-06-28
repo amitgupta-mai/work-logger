@@ -30,6 +30,7 @@ export const EntriesList = ({
           isDeletable={isDeletable}
           startTime={entry.startTime}
           endTime={entry.endTime}
+          type={entry.type}
         />
       ))}
     </ul>

@@ -14,13 +14,18 @@ import {
 import { Trash2Icon } from 'lucide-react';
 import { EntryProps } from '../../../types';
 
-const Entry: React.FC<EntryProps> = ({
+const Entry: React.FC<EntryProps & { type?: string }> = ({
   entry,
   onDelete,
   isDeletable,
   startTime,
   endTime,
+  type,
 }) => {
+  let displayEntry = entry;
+  if ((type === 'Task' || !type) && entry.startsWith('Project:')) {
+    displayEntry = entry.replace(/^Project:/, 'Task:');
+  }
   return (
     <div className='group flex items-center h-10 border-b border-gray-200'>
       <span className='text-xs text-muted-foreground mr-2'>
@@ -33,7 +38,7 @@ const Entry: React.FC<EntryProps> = ({
           : ''}
       </span>
       <span className='text-sm truncate semibold block max-w-[300px]'>
-        {entry}
+        {displayEntry}
       </span>
 
       {isDeletable && (

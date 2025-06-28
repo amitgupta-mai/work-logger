@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { TaskFormProps } from '../../../types';
 import { DurationSelector } from '../../ui/durationSelector';
 import { setChromeStorageData } from '../../../utils/chromeStorageUtils';
@@ -15,9 +15,7 @@ export const TaskForm = ({
   selectedDuration,
   setSelectedDuration,
   taskRecorded,
-  startTime,
   startAmPm,
-  endTime,
   endAmPm,
   durationMode,
   setDurationMode,
@@ -31,10 +29,6 @@ export const TaskForm = ({
   setEndMinute,
 }: TaskFormProps) => {
   const selectorDisabled = false;
-  const [timeErrors, setTimeErrors] = useState<{
-    start?: string;
-    end?: string;
-  }>({});
 
   const { projects, loadOptions, handleCreateProject } = useOptionsLoader();
 
@@ -47,24 +41,12 @@ export const TaskForm = ({
       setSelectedDuration(null);
       setChromeStorageData({ elapsedTime: 0 });
     }
-  }, [taskRecorded]);
+  }, [taskRecorded, setSelectedDuration]);
 
-  useEffect(() => {
-    const startError = validateTimeInput(startTime);
-    const endError = validateTimeInput(endTime);
-    setTimeErrors({ start: startError, end: endError });
-  }, [startTime, endTime]);
-
-  function validateTimeInput(time: string) {
-    if (!time) return 'Time is required';
-    if (!/^([0]?[1-9]|1[0-2]):[0-5][0-9]$/.test(time))
-      return 'Invalid time format (hh:mm)';
-    return '';
-  }
-
-  function getMinutes(hour: string, minute: string) {
+  function getMinutes(hour: string, minute: string, ampm: string) {
     let h = parseInt(hour, 10);
-    if (h === 12) h = 0;
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
     return h * 60 + parseInt(minute, 10);
   }
 
@@ -72,14 +54,30 @@ export const TaskForm = ({
     durationMode === 'manual'
       ? (() => {
           if (!startHour || !startMinute || !endHour || !endMinute) return '';
-          const start = getMinutes(startHour, startMinute);
-          const end = getMinutes(endHour, endMinute);
+          const start = getMinutes(startHour, startMinute, startAmPm);
+          const end = getMinutes(endHour, endMinute, endAmPm);
           return end > start ? end - start : '';
         })()
       : selectedDuration?.value || '';
 
   const formatTime = (h: string, m: string, ampm: string) =>
     h && m ? `${h}:${m} ${ampm}` : '--:--';
+
+  const isManualTimeFilled =
+    !!startHour &&
+    !!startMinute &&
+    !!startAmPm &&
+    !!endHour &&
+    !!endMinute &&
+    !!endAmPm;
+
+  const endTimeError =
+    durationMode === 'manual' &&
+    isManualTimeFilled &&
+    getMinutes(endHour, endMinute, endAmPm) <=
+      getMinutes(startHour, startMinute, startAmPm)
+      ? 'End time must be after start time'
+      : '';
 
   return (
     <div className='space-y-4'>
@@ -156,11 +154,6 @@ export const TaskForm = ({
                   ampm={startAmPm}
                   onAmPmChange={() => {}}
                   label=''
-                  error={timeErrors.start}
-                  touched={false}
-                  onHourBlur={() => {}}
-                  onMinuteBlur={() => {}}
-                  onAmPmBlur={() => {}}
                 />
               </TabsContent>
               <TabsContent value='end'>
@@ -175,11 +168,7 @@ export const TaskForm = ({
                   ampm={endAmPm}
                   onAmPmChange={() => {}}
                   label=''
-                  error={timeErrors.end}
-                  touched={false}
-                  onHourBlur={() => {}}
-                  onMinuteBlur={() => {}}
-                  onAmPmBlur={() => {}}
+                  error={endTimeError}
                 />
               </TabsContent>
             </Tabs>
