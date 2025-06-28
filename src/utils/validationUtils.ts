@@ -1,4 +1,4 @@
-import { FormValidation, EntryType, OptionType } from '../types';
+import { FormValidation, EntryType, OptionType } from '../types/index';
 
 export const validateEntry = (entry: Partial<EntryType>): FormValidation => {
   const errors: string[] = [];

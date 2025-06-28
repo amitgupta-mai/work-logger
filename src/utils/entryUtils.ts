@@ -1,4 +1,4 @@
-import { EntryType, LogType } from '../types';
+import { EntryType, LogType } from '../types/index';
 import { getDateKey, getCurrentDateKey, formatDuration } from './dateTimeUtils';
 import { setStorageDataAsync, getStorageDataAsync } from './chromeStorageUtils';
 

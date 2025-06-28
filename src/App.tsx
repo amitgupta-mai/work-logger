@@ -1,4 +1,4 @@
-import Logger from './components/tabs/logger';
+import Logger from './components/tabs/logger/Logger';
 
 import './App.css';
 import 'react-confirm-alert/src/react-confirm-alert.css';

@@ -18,8 +18,8 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch() {
-    // Optionally log error info
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.log('ErrorBoundary caught an error', error, errorInfo);
   }
 
   handleReload = () => {
