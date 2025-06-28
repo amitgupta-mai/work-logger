@@ -1,5 +1,20 @@
-import { CreatableSelectFieldProps } from '../../../types';
+import { OptionType } from '../../../types';
 import { StyledCreatableSelect } from '../../ui/creatableSelect';
+
+interface CreatableSelectFieldProps {
+  value: OptionType | null;
+  onChange: (value: OptionType | null) => void;
+  onCreateOption: (
+    inputValue: string,
+    onSelect?: (value: OptionType) => void
+  ) => void;
+  options: OptionType[];
+  placeholder: string;
+  isClearable?: boolean;
+  isSearchable?: boolean;
+  isDisabled?: boolean;
+  className?: string;
+}
 
 const CreatableSelectField = ({
   value,
@@ -15,7 +30,7 @@ const CreatableSelectField = ({
   <StyledCreatableSelect
     value={value}
     onChange={onChange}
-    onCreateOption={onCreateOption}
+    onCreateOption={(inputValue) => onCreateOption(inputValue, onChange)}
     options={options}
     placeholder={placeholder}
     isClearable={isClearable}

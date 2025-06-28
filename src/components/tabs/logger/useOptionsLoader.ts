@@ -24,19 +24,21 @@ export function useOptionsLoader() {
   }, []);
 
   const handleCreatePerson = useCallback(
-    (inputValue: string) => {
+    (inputValue: string, onSelect?: (value: OptionType) => void) => {
       const newPerson = { label: inputValue, value: inputValue };
       setPeople((prev) => [...prev, newPerson]);
       setChromeStorageData({ people: [...people, newPerson] });
+      if (onSelect) onSelect(newPerson);
     },
     [people]
   );
 
   const handleCreateProject = useCallback(
-    (inputValue: string) => {
+    (inputValue: string, onSelect?: (value: OptionType) => void) => {
       const newProject = { label: inputValue, value: inputValue };
       setProjects((prev) => [...prev, newProject]);
       setChromeStorageData({ projects: [...projects, newProject] });
+      if (onSelect) onSelect(newProject);
     },
     [projects]
   );

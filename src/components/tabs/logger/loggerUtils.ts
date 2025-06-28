@@ -38,7 +38,88 @@ export function getManualDuration({
   return end > start ? end - start : 0;
 }
 
-export function formatTime(h: string, m: string, ampm: string): string {
-  if (!h || !m || !ampm) return '';
-  return `${h}:${m} ${ampm}`;
+export function formatTime(h: string, m: string, ampm: string) {
+  return h && m ? `${h}:${m} ${ampm}` : '--:--';
+}
+
+export function getMinutes(hour: string, minute: string, ampm: string) {
+  let h = parseInt(hour, 10);
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return h * 60 + parseInt(minute, 10);
+}
+
+export function getEndTimeError({
+  durationMode,
+  startHour,
+  startMinute,
+  startAmPm,
+  endHour,
+  endMinute,
+  endAmPm,
+}: {
+  durationMode: 'dropdown' | 'manual';
+  startHour: string;
+  startMinute: string;
+  startAmPm: string;
+  endHour: string;
+  endMinute: string;
+  endAmPm: string;
+}): string {
+  const allFilled =
+    !!startHour &&
+    !!startMinute &&
+    !!startAmPm &&
+    !!endHour &&
+    !!endMinute &&
+    !!endAmPm;
+  if (
+    durationMode === 'manual' &&
+    allFilled &&
+    getMinutes(endHour, endMinute, endAmPm) <=
+      getMinutes(startHour, startMinute, startAmPm)
+  ) {
+    return 'End time must be after start time';
+  }
+  return '';
+}
+
+export function getCalculatedDuration({
+  durationMode,
+  startHour,
+  startMinute,
+  startAmPm,
+  endHour,
+  endMinute,
+  endAmPm,
+  selectedDuration,
+}: {
+  durationMode: 'dropdown' | 'manual';
+  startHour: string;
+  startMinute: string;
+  startAmPm: string;
+  endHour: string;
+  endMinute: string;
+  endAmPm: string;
+  selectedDuration?: { value: number } | null;
+}): string | number {
+  if (durationMode === 'manual') {
+    if (!startHour || !startMinute || !endHour || !endMinute) return '';
+    const start = getMinutes(startHour, startMinute, startAmPm);
+    const end = getMinutes(endHour, endMinute, endAmPm);
+    return end > start ? end - start : '';
+  }
+  return selectedDuration?.value || '';
+}
+
+export function formatMinutesToHM(minutes: number): string {
+  if (isNaN(minutes) || minutes < 0) return '';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  let result = '';
+  if (h > 0) result += `${h}h`;
+  if (h > 0 && m > 0) result += ' ';
+  if (m > 0) result += `${m}m`;
+  if (result === '') result = '0m';
+  return result;
 }

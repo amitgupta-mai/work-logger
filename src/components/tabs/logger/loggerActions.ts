@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import { addEntry, handleDeleteEntry } from '../../../utils/entryUtils';
 import { format } from 'date-fns';
 import { EntryType, OptionType, HandleAddEntryArgs } from '../../../types';
+import { formatMinutesToHM } from './loggerUtils';
 
 export async function handleAddEntryAction(args: HandleAddEntryArgs) {
   const {
@@ -38,10 +39,14 @@ export async function handleAddEntryAction(args: HandleAddEntryArgs) {
   try {
     let durationLabel = '';
     if (durationMode === 'dropdown') {
-      durationLabel = selectedDuration?.label || '';
+      durationLabel =
+        selectedDuration?.value != null
+          ? formatMinutesToHM(selectedDuration.value)
+          : '';
     } else {
       const manualDuration = getManualDuration();
-      durationLabel = manualDuration > 0 ? `${manualDuration} min` : '';
+      durationLabel =
+        manualDuration > 0 ? formatMinutesToHM(manualDuration) : '';
     }
     let entryText = `Project: ${selectedProject?.label} - ${durationLabel}`;
     if (logType === 'Task' && durationMode === 'manual') {
