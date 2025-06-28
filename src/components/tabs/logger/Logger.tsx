@@ -70,8 +70,10 @@ const Logger = () => {
               taskRecorded={taskRecorded}
               startTime={startTime}
               startAmPm={startAmPm}
+              setStartAmPm={setStartAmPm}
               endTime={endTime}
               endAmPm={endAmPm}
+              setEndAmPm={setEndAmPm}
               durationMode={durationMode}
               setDurationMode={setDurationMode}
               startHour={startHour}

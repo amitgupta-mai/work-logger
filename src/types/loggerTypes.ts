@@ -38,8 +38,10 @@ export interface TaskFormProps {
   taskRecorded: boolean;
   startTime: string;
   startAmPm: string;
+  setStartAmPm: (v: string) => void;
   endTime: string;
   endAmPm: string;
+  setEndAmPm: (v: string) => void;
   durationMode: 'dropdown' | 'manual';
   setDurationMode: (mode: 'dropdown' | 'manual') => void;
   startHour: string;
