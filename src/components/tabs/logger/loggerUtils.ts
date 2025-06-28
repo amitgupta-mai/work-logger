@@ -111,3 +111,15 @@ export function getCalculatedDuration({
   }
   return selectedDuration?.value || '';
 }
+
+export function formatMinutesToHM(minutes: number): string {
+  if (isNaN(minutes) || minutes < 0) return '';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  let result = '';
+  if (h > 0) result += `${h}h`;
+  if (h > 0 && m > 0) result += ' ';
+  if (m > 0) result += `${m}m`;
+  if (result === '') result = '0m';
+  return result;
+}

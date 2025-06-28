@@ -11,6 +11,7 @@ import {
   getEndTimeError,
   formatTime,
   getCalculatedDuration,
+  formatMinutesToHM,
 } from './loggerUtils';
 import { ClockIcon } from 'lucide-react';
 
@@ -71,7 +72,7 @@ export const MeetingForm = ({
   });
 
   return (
-    <>
+    <div className='space-y-4'>
       <CreatableSelectField
         placeholder={`Select or type person's name`}
         value={selectedPerson}
@@ -150,7 +151,7 @@ export const MeetingForm = ({
                 calculatedDuration !== '' && (
                   <div className='text-sm flex items-center gap-1'>
                     <ClockIcon className='w-4 h-4 text-white' />
-                    {calculatedDuration} min
+                    {formatMinutesToHM(Number(calculatedDuration))}
                   </div>
                 )}
             </div>
@@ -184,6 +185,6 @@ export const MeetingForm = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
