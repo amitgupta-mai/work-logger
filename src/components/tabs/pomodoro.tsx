@@ -105,11 +105,14 @@ const Popup = () => {
 
           // Auto-start break or work if enabled
           if (remainingTime === 0 && response.data.isPomodoroRunning) {
-            if (isBreakMode && settings.autoStartWork) {
-              startPomodoro();
-            } else if (!isBreakMode && settings.autoStartBreaks) {
-              startBreak();
-            }
+            // Add a small delay to ensure background script processes completion first
+            setTimeout(() => {
+              if (isBreakMode && settings.autoStartWork) {
+                startPomodoro();
+              } else if (!isBreakMode && settings.autoStartBreaks) {
+                startBreak();
+              }
+            }, 500); // 500ms delay
           }
         }
       } catch (error) {

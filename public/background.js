@@ -119,6 +119,136 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
         }
       );
+    } else if (request.action === 'enableBreakReminders') {
+      // Enable break reminders and set up the alarm
+      const interval = request.interval || 60;
+      const now = Date.now();
+      const nextBreakTime = now + interval * 60 * 1000;
+
+      chrome.alarms.create('breakReminderAlarm', {
+        delayInMinutes: interval,
+      });
+
+      chrome.storage.local.set(
+        {
+          breakSettings: {
+            ...request.settings,
+            enabled: true,
+            lastBreakTime: now,
+            nextBreakTime: nextBreakTime,
+          },
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error enabling break reminders:',
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+          } else {
+            sendResponse({ success: true });
+          }
+        }
+      );
+    } else if (request.action === 'disableBreakReminders') {
+      // Disable break reminders and clear the alarm
+      chrome.alarms.clear('breakReminderAlarm');
+
+      chrome.storage.local.set(
+        {
+          breakSettings: {
+            ...request.settings,
+            enabled: false,
+            lastBreakTime: 0,
+            nextBreakTime: 0,
+          },
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error disabling break reminders:',
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+          } else {
+            sendResponse({ success: true });
+          }
+        }
+      );
+    } else if (request.action === 'updateBreakReminders') {
+      // Update break reminder settings and reset the alarm
+      const interval = request.interval || 60;
+      const now = Date.now();
+      const nextBreakTime = now + interval * 60 * 1000;
+
+      chrome.alarms.clear('breakReminderAlarm');
+      chrome.alarms.create('breakReminderAlarm', {
+        delayInMinutes: interval,
+      });
+
+      chrome.storage.local.set(
+        {
+          breakSettings: {
+            ...request.settings,
+            lastBreakTime: now,
+            nextBreakTime: nextBreakTime,
+          },
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error updating break reminders:',
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+          } else {
+            sendResponse({ success: true });
+          }
+        }
+      );
+    } else if (request.action === 'markBreakTaken') {
+      // Mark break as taken and schedule next break
+      const interval = request.interval || 60;
+      const now = Date.now();
+      const nextBreakTime = now + interval * 60 * 1000;
+
+      chrome.alarms.clear('breakReminderAlarm');
+      chrome.alarms.create('breakReminderAlarm', {
+        delayInMinutes: interval,
+      });
+
+      chrome.storage.local.set(
+        {
+          breakSettings: {
+            ...request.settings,
+            lastBreakTime: now,
+            nextBreakTime: nextBreakTime,
+          },
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Error marking break taken:',
+              chrome.runtime.lastError
+            );
+            sendResponse({
+              success: false,
+              error: chrome.runtime.lastError.message,
+            });
+          } else {
+            sendResponse({ success: true });
+          }
+        }
+      );
     } else if (request.action === 'showBreakReminder') {
       // Handle break reminder with audio notification
       const customMessage = request.message || 'Time for a break!';
@@ -209,7 +339,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       });
     } else if (alarm.name === 'pomodoroAlarm') {
       chrome.storage.local.get(
-        ['isPomodoroRunning', 'isBreak', 'pomodoroSettings'],
+        [
+          'isPomodoroRunning',
+          'isBreak',
+          'pomodoroSettings',
+          'completedPomodoros',
+        ],
         (result) => {
           if (chrome.runtime.lastError) {
             console.error(
@@ -220,6 +355,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
           }
 
           const isBreak = result.isBreak || false;
+          const currentCompleted = result.completedPomodoros || 0;
           const title = isBreak
             ? 'Break Complete! 🎯'
             : 'Pomodoro Complete! 🍅';
@@ -258,12 +394,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
             }
           );
 
+          // Increment completed count if it was a work session (not a break)
+          const newCompleted = isBreak
+            ? currentCompleted
+            : currentCompleted + 1;
+
           chrome.storage.local.set(
             {
               isPomodoroRunning: false,
               pomodoroStartTime: null,
               pomodoroDuration: null,
               isBreak: false,
+              completedPomodoros: newCompleted,
             },
             () => {
               if (chrome.runtime.lastError) {
@@ -276,6 +418,93 @@ chrome.alarms.onAlarm.addListener((alarm) => {
           );
         }
       );
+    } else if (alarm.name === 'breakReminderAlarm') {
+      chrome.storage.local.get(['breakSettings'], (result) => {
+        if (chrome.runtime.lastError) {
+          console.error(
+            'Error getting break settings:',
+            chrome.runtime.lastError
+          );
+          return;
+        }
+
+        const breakSettings = result.breakSettings;
+        if (!breakSettings || !breakSettings.enabled) {
+          return;
+        }
+
+        const randomActivity =
+          breakSettings.breakActivities &&
+          breakSettings.breakActivities.length > 0
+            ? breakSettings.breakActivities[
+                Math.floor(Math.random() * breakSettings.breakActivities.length)
+              ]
+            : 'Take a short walk';
+
+        const message = `${
+          breakSettings.customMessage || 'Time for a break!'
+        }\n\nSuggested activity: ${randomActivity}`;
+
+        // Play notification sound if enabled
+        const ttsEnabled =
+          breakSettings.ttsEnabled !== undefined
+            ? breakSettings.ttsEnabled
+            : true;
+        if (ttsEnabled) {
+          playNotificationSound('Break reminder');
+        }
+
+        // Show notification based on reminder type
+        if (
+          breakSettings.reminderType === 'notification' ||
+          breakSettings.reminderType === 'both'
+        ) {
+          chrome.notifications.create(
+            {
+              type: 'basic',
+              iconUrl: 'icon.png',
+              title: 'Break Reminder! 🎯',
+              message: message,
+              priority: 2,
+            },
+            (notificationId) => {
+              if (chrome.runtime.lastError) {
+                console.error(
+                  'Error creating break reminder notification:',
+                  chrome.runtime.lastError
+                );
+              }
+            }
+          );
+        }
+
+        // Schedule next break
+        const interval = breakSettings.interval || 60;
+        const now = Date.now();
+        const nextBreakTime = now + interval * 60 * 1000;
+
+        chrome.alarms.create('breakReminderAlarm', {
+          delayInMinutes: interval,
+        });
+
+        chrome.storage.local.set(
+          {
+            breakSettings: {
+              ...breakSettings,
+              lastBreakTime: now,
+              nextBreakTime: nextBreakTime,
+            },
+          },
+          () => {
+            if (chrome.runtime.lastError) {
+              console.error(
+                'Error updating break settings:',
+                chrome.runtime.lastError
+              );
+            }
+          }
+        );
+      });
     }
   } catch (error) {
     console.error('Error handling alarm:', error);
