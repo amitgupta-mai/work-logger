@@ -90,10 +90,38 @@ const BreakReminder = () => {
     loadSettings();
   }, [loadSettings]);
 
+  // Refresh settings when component becomes visible (tab switch)
+  useEffect(() => {
+    const refreshSettings = async () => {
+      const response = await getStorageDataAsync(['breakSettings']);
+      if (response.success && response.data?.breakSettings) {
+        const updatedSettings = response.data.breakSettings;
+        setSettings((prev) => ({ ...prev, ...updatedSettings }));
+      }
+    };
+
+    // Refresh immediately when component mounts
+    refreshSettings();
+
+    // Set up a periodic refresh every 5 seconds to catch background updates
+    const refreshInterval = setInterval(refreshSettings, 5000);
+
+    return () => clearInterval(refreshInterval);
+  }, []);
+
   useEffect(() => {
     if (!settings.enabled) return;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
+      // Check for updated settings more frequently during countdown
+      const response = await getStorageDataAsync(['breakSettings']);
+      if (response.success && response.data?.breakSettings) {
+        const updatedSettings = response.data.breakSettings;
+        if (updatedSettings.nextBreakTime !== settings.nextBreakTime) {
+          setSettings((prev) => ({ ...prev, ...updatedSettings }));
+        }
+      }
+
       const now = Date.now();
       const timeLeft = settings.nextBreakTime - now;
       setTimeUntilBreak(Math.max(0, timeLeft));
@@ -149,7 +177,16 @@ const BreakReminder = () => {
             );
             toast.error('Failed to enable break reminders');
           } else {
-            setSettings(newSettings);
+            // Immediately update UI with the new break time
+            const now = Date.now();
+            const nextBreakTime = now + newSettings.interval * 60 * 1000;
+            const updatedSettings = {
+              ...newSettings,
+              lastBreakTime: now,
+              nextBreakTime: nextBreakTime,
+            };
+            setSettings(updatedSettings);
+            setTimeUntilBreak(newSettings.interval * 60 * 1000);
             toast.success('Break reminders enabled!');
           }
         }
@@ -169,7 +206,14 @@ const BreakReminder = () => {
             );
             toast.error('Failed to disable break reminders');
           } else {
-            setSettings(newSettings);
+            // Reset all break-related state
+            const resetSettings = {
+              ...newSettings,
+              lastBreakTime: 0,
+              nextBreakTime: 0,
+            };
+            setSettings(resetSettings);
+            setTimeUntilBreak(0);
             toast.info('Break reminders disabled');
           }
         }

@@ -162,6 +162,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           breakSettings: {
             ...request.settings,
             enabled: false,
+            lastBreakTime: 0,
+            nextBreakTime: 0,
           },
         },
         () => {
