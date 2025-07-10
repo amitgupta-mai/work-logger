@@ -96,89 +96,84 @@ const BreakReminder = () => {
     const interval = setInterval(() => {
       const now = Date.now();
       const timeLeft = settings.nextBreakTime - now;
-
-      if (timeLeft <= 0) {
-        showBreakReminder();
-        markBreakTaken();
-      } else {
-        setTimeUntilBreak(timeLeft);
-      }
+      setTimeUntilBreak(Math.max(0, timeLeft));
     }, 1000);
 
     return () => clearInterval(interval);
   }, [settings]);
 
-  const showBreakReminder = () => {
-    const randomActivity =
-      settings.breakActivities[
-        Math.floor(Math.random() * settings.breakActivities.length)
-      ];
-
-    const message = `${settings.customMessage}\n\nSuggested activity: ${randomActivity}`;
-
-    if (
-      settings.reminderType === 'notification' ||
-      settings.reminderType === 'both'
-    ) {
-      chrome.runtime.sendMessage(
-        {
-          action: 'showBreakReminder',
-          message: message,
-        },
-        (response) => {
-          if (chrome.runtime.lastError || !response?.success) {
-            console.error(
-              'Error showing break reminder:',
-              chrome.runtime.lastError || response?.error
-            );
-            chrome.notifications.create({
-              type: 'basic',
-              iconUrl: 'icon.png',
-              title: 'Break Time! 🎯',
-              message: message,
-              priority: 2,
-            });
-          }
-        }
-      );
-    }
-
-    if (settings.reminderType === 'popup' || settings.reminderType === 'both') {
-      toast.info(message, {
-        duration: 10000,
-        position: 'top-center',
-      });
-    }
-  };
-
   const markBreakTaken = async () => {
-    const now = Date.now();
-    const newSettings = {
-      ...settings,
-      lastBreakTime: now,
-      nextBreakTime: now + settings.interval * 60 * 1000,
-    };
-
-    setSettings(newSettings);
-    await saveSettings(newSettings);
-    setTimeUntilBreak(settings.interval * 60 * 1000);
+    chrome.runtime.sendMessage(
+      {
+        action: 'markBreakTaken',
+        interval: settings.interval,
+        settings: settings,
+      },
+      (response) => {
+        if (chrome.runtime.lastError || !response?.success) {
+          console.error(
+            'Error marking break taken:',
+            chrome.runtime.lastError || response?.error
+          );
+          toast.error('Failed to mark break as taken');
+        } else {
+          const now = Date.now();
+          const newSettings = {
+            ...settings,
+            lastBreakTime: now,
+            nextBreakTime: now + settings.interval * 60 * 1000,
+          };
+          setSettings(newSettings);
+          setTimeUntilBreak(settings.interval * 60 * 1000);
+        }
+      }
+    );
   };
 
   const toggleBreakReminder = async () => {
     const newSettings = { ...settings, enabled: !settings.enabled };
-    if (newSettings.enabled) {
-      const now = Date.now();
-      newSettings.lastBreakTime = now;
-      newSettings.nextBreakTime = now + newSettings.interval * 60 * 1000;
-    }
-
-    setSettings(newSettings);
-    await saveSettings(newSettings);
 
     if (newSettings.enabled) {
-      toast.success('Break reminders enabled!');
+      // Enable break reminders via background script
+      chrome.runtime.sendMessage(
+        {
+          action: 'enableBreakReminders',
+          interval: newSettings.interval,
+          settings: newSettings,
+        },
+        (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error enabling break reminders:',
+              chrome.runtime.lastError || response?.error
+            );
+            toast.error('Failed to enable break reminders');
+          } else {
+            setSettings(newSettings);
+            toast.success('Break reminders enabled!');
+          }
+        }
+      );
     } else {
-      toast.info('Break reminders disabled');
+      // Disable break reminders via background script
+      chrome.runtime.sendMessage(
+        {
+          action: 'disableBreakReminders',
+          settings: newSettings,
+        },
+        (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error disabling break reminders:',
+              chrome.runtime.lastError || response?.error
+            );
+            toast.error('Failed to disable break reminders');
+          } else {
+            setSettings(newSettings);
+            toast.info('Break reminders disabled');
+          }
+        }
+      );
     }
   };
 
@@ -188,7 +183,29 @@ const BreakReminder = () => {
   ) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
-    saveSettings(newSettings);
+
+    // If interval changed and reminders are enabled, update the background script
+    if (key === 'interval' && settings.enabled) {
+      chrome.runtime.sendMessage(
+        {
+          action: 'updateBreakReminders',
+          interval: value as number,
+          settings: newSettings,
+        },
+        (response) => {
+          if (chrome.runtime.lastError || !response?.success) {
+            console.error(
+              'Error updating break reminders:',
+              chrome.runtime.lastError || response?.error
+            );
+            toast.error('Failed to update break reminders');
+          }
+        }
+      );
+    } else {
+      // For other settings, just save locally
+      saveSettings(newSettings);
+    }
   };
 
   const formatTimeUntilBreak = (ms: number): string => {
